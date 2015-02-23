@@ -534,8 +534,20 @@ Apache
 # /usr/bin/kubectl --server=http://master:8080 delete pod apache
 ```
 
-Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the guestbook example. It's a bit more complicated but should expose you to more functionality.
+Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the guestbook example. It is a bit more complicated but should expose you to more functionality.
+
+## Use SPCs on the Atomic Hosts
+
+###Using rsyslog
 
 
 
-Use SPCs on the Atomic Hosts
+
+###Using sadc
+
+
+
+
+
+###Using rhel-tools
+
