@@ -547,7 +547,7 @@ The rsyslog container runs in the background for the purposes of managing logs. 
 1. Quick smoke test to make sure logging is working on the localhost.
 2. Remote logging.  We will send some logs over the network.
 
-####Quick Smoketest
+####Scenario 1: Quick Smoketest
 
 * Check the environment before.  You may have a couple of residual images.  You should not have any rsyslog images. You can perform this on the master node.
 
@@ -623,21 +623,23 @@ logger test
 Feb  9 16:31:36 localhost vagrant: test
 ```
 
+####Scenario 2: Remote Logging
+
+Stop the rsyslog container on the master node.  We are going to make a change to the /etc/rsyslog.conf file and we will need to re-read that.  Use _docker stop <container id>_ to stop the container.
 
 
-How do I use it (scenario 2: remote logging)?
-
-Configure the client by pointing it to the rsyslog server in the /etc/rsyslog.conf
+On the master node, point it to the rsyslog server in the /etc/rsyslog.conf.  Substitute your IP address here. The entry below is at the bottom of the file.
 
 ```
 *.* @@192.168.121.249:514
 ```
 
-
-* Configure the rsyslog server; ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog.
-
+* Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog. First backup the file.
 
 ```
+cp /etc/rsyslog.conf{,.old}
+
+
 $ModLoad imklog # reads kernel messages (the same are read from journald)
 $ModLoad imudp
 $UDPServerRun 514
