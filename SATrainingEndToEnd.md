@@ -547,6 +547,7 @@ The rsyslog container runs in the background for the purposes of managing logs. 
 1. Quick smoke test to make sure logging is working on the localhost.
 2. Remote logging.  We will send some logs over the network.
 
+####Quick Smoketest
 
 * Check the environment before.  You may have a couple of residual images.  You should not have any rsyslog images. You can perform this on the master node.
 
