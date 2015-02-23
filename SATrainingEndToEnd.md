@@ -625,22 +625,33 @@ Feb  9 16:31:36 localhost vagrant: test
 
 ####Scenario 2: Remote Logging
 
-Stop the rsyslog container on the master node.  We are going to make a change to the /etc/rsyslog.conf file and we will need to re-read that.  Use following steps to stop the container.
+#THIS MIGHT NOT WORK FOR SA TRAINING.  THE PROBLEM IS THAT WE NEED TO ADD A --net=host TO THE LABEL.  SKIP THIS SECTION FOR NOW.  2/23/2015 - scollier
 
+
+Stop the rsyslog container on the master node.  We are going to make a change to the /etc/rsyslog.conf file and we will need to re-read that.  Use following steps to stop the container. After the container is stopped you can change the file and restart the container.
 
 ```
 docker ps
-docker stop \<container id\>
+docker stop <container id>
+docker ps -a
+docker rm <container id>
 ```
-
 
 On the master node, point it to the rsyslog server in the /etc/rsyslog.conf.  Substitute your IP address here. The entry below is at the bottom of the file.
 
 ```
-*.* @@192.168.121.249:514
+*.* @@192.168.121.147:514
 ```
 
-* Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog. First backup the file.
+* Now switch to the rsyslog server (kubelet 1).  Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Install rsyslog on the kublet server.
+
+```
+atomic install --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+```
+
+
+
+* Ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog. First backup the file.
 
 ```
 cp /etc/rsyslog.conf{,.old}
@@ -655,9 +666,18 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 *.* ?FILENAME
 ```
 
+* Start the rsyslog server.
+
+
+```
+atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+```
+
+
 * Test the configuration.
 
-* On the Atomic host open a terminal and issue: “logger remote test”
+
+* On the Atomic master host open a terminal, make sure rsyslog is started with atomic run, and issue: “logger remote test”
 
 * On the rsyslog server, check in the /var/log/ directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a syslog.log file.  Watch that file.
 
@@ -674,8 +694,10 @@ Feb 10 09:40:07 localhost vagrant: remote test
 Stop the container and remove the image
 
 ```
-atomic uninstall docker-registry.usersys.redhat.com/sct_/rsyslog:latest
+atomic uninstall docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2
 ```
+
+# END SKIP SECTION 2/23/2015 - scollier
 
 
 ###Using sadc
