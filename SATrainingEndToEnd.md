@@ -607,35 +607,46 @@ CONTAINER ID        IMAGE                                                    COM
 
 How do I use it (scenario 1: single host smoke test)?
 
-In one terminal, watch the logs
+* In one terminal, watch the logs
 
-# tail -f /var/log/messages
+```
+tail -f /var/log/messages
+```
 
-In another terminal, generate a log
+* In another terminal, generate a log
 
-# logger test
+```
+logger test
+```
 
-Back in the first terminal, you should see an entry with “test”
+* Back in the first terminal, you should see an entry with “test”
 
+```
 Feb  9 16:31:36 localhost vagrant: test
+```
 
 
-How do I remove it?
+* How do I remove it?
 
 Stop the container and remove the image
 
-# atomic uninstall docker-registry.usersys.redhat.com/sct_/rsyslog:latest
+```
+atomic uninstall docker-registry.usersys.redhat.com/sct_/rsyslog:latest
+```
 
 How do I use it (scenario 2: remote logging)?
 
 Configure the client by pointing it to the rsyslog server in the /etc/rsyslog.conf
 
+```
 *.* @@192.168.121.249:514
+```
 
 
-Configure the rsyslog server; ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog.
+* Configure the rsyslog server; ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog.
 
 
+```
 $ModLoad imklog # reads kernel messages (the same are read from journald)
 $ModLoad imudp
 $UDPServerRun 514
@@ -643,18 +654,21 @@ $ModLoad imtcp
 $InputTCPServerRun 514
 $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 *.* ?FILENAME
+```
 
-      2.  Test the configuration.
+* Test the configuration.
 
-On the Atomic host open a terminal and issue: “logger remote test”
+* On the Atomic host open a terminal and issue: “logger remote test”
 
-On the rsyslog server, check in the /var/log/ directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a syslog.log file.  Watch that file.
+* On the rsyslog server, check in the /var/log/ directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a syslog.log file.  Watch that file.
 
-# tail -f /var/log/192.168.121.228/syslog.log
+```
+tail -f /var/log/192.168.121.228/syslog.log
 Feb 10 09:40:01 localhost CROND[6210]: (root) CMD (/usr/lib64/sa/sa1 1 1)
 Feb 10 09:40:03 localhost vagrant: remote test
 Feb 10 09:40:05 localhost vagrant: remote test
 Feb 10 09:40:07 localhost vagrant: remote test
+```
 
 
 
