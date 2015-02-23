@@ -548,7 +548,7 @@ The rsyslog container runs in the background for the purposes of managing logs. 
 2. Remote logging.  We will send some logs over the network.
 
 
-* Check the environment before.
+* Check the environment before.  You may have a couple of residual images.  You should not have any rsyslog images. You can perform this on the master node.
 
 ```
 docker images
@@ -561,30 +561,25 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 * Install the container.
 
 ```
-atomic install docker-registry.usersys.redhat.com/sct_/rsyslog:latest
-Pulling repository docker-registry.usersys.redhat.com/sct_/rsyslog
-72a653be27ae: Download complete
-1c83bb3630b8: Download complete
-71c475dd72ea: Download complete
-d4677795c418: Download complete
-7ebacaa5cc3a: Download complete
-f5b3ea7dd485: Download complete
-ce5395955eb2: Download complete
-6e7486661b9d: Download complete
-2a812e24a31d: Download complete
-ebe911e2eb41: Download complete
-04bb173ac0bc: Download complete
-156aad864a90: Download complete
-Status: Downloaded newer image for docker-registry.usersys.redhat.com/sct_/rsyslog:latest
-docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=docker-registry.usersys.redhat.com/sct_/rsyslog:latest -e NAME=rsyslog docker-registry.usersys.redhat.com/sct_/rsyslog:latest /bin/install.sh
+atomic install --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=docker-registry.usersys.redhat.com/atomcga/rsyslog -e NAME=rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog /bin/install.sh
+Installing file at /host//etc/rsyslog.conf in place of existing empty directory
+Installing file at /host//etc/rsyslog.conf
+Installing file at /host//etc/sysconfig/rsyslog
 ```
 
-* Check the environment after the install.
+* Run the container.
+
+
+```
+atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+
+```
+
+* Check the environment after the install.  You should now see the rsyslog image, but no container yet.
 
 ```
 docker images
-REPOSITORY                                        TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-docker-registry.usersys.redhat.com/sct_/rsyslog   latest              72a653be27ae        47 hours ago        355.9 MB
 
 docker ps -a
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
@@ -593,27 +588,29 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 * Run it         
 
 ```
-atomic run --name rsyslog docker-registry.usersys.redhat.com/sct_/rsyslog:latest docker run -d --privileged --name rsyslog -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log/journal:/run/log/journal -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -e IMAGE=docker-registry.usersys.redhat.com/sct_/rsyslog:latest -e NAME=rsyslog --restart=always docker-registry.usersys.redhat.com/sct_/rsyslog:latest /bin/rsyslog.sh
-140de8dc0103b5a39b07455d29591313024c30ba2df7290ac39eff68371eeb00
+atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+Pulling repository docker-registry.usersys.redhat.com/atomcga/rsyslog
+72fff92e8533: Download complete 
+Status: Downloaded newer image for docker-registry.usersys.redhat.com/atomcga/rsyslog:latest
+docker run -d --privileged --name rsyslog -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -v /etc/hostname:/etc/hostname -e IMAGE=docker-registry.usersys.redhat.com/atomcga/rsyslog -e NAME=rsyslog --restart=always docker-registry.usersys.redhat.com/atomcga/rsyslog /bin/rsyslog.sh
+c86ba2e7e205cadfff1facc4ebb820e849c8a8cc57c22caabffbbe7c7d3d9f8d
 ```
 
-* Check the environment
+* Check the environment.  Now you should see a running rsyslog container.
 
 ```
-docker ps
-CONTAINER ID        IMAGE                                                    COMMAND             CREATED             STATUS              PORTS               NAMES
-140de8dc0103        docker-registry.usersys.redhat.com/sct_/rsyslog:latest   "/bin/rsyslog.sh"   5 seconds ago       Up 1 seconds                            rsyslog    
+# docker ps
+CONTAINER ID        IMAGE                                                      COMMAND             CREATED             STATUS              PORTS               NAMES
+c86ba2e7e205        docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2   "/bin/rsyslog.sh"   2 minutes ago       Up 41 seconds                           rsyslog       
 ```
 
-How do I use it (scenario 1: single host smoke test)?
-
-* In one terminal, watch the logs
+* How do I use it (scenario 1: single host smoke test)?  In one terminal on the master node, watch the logs.
 
 ```
 tail -f /var/log/messages
 ```
 
-* In another terminal, generate a log
+* In another terminal, still on the master, generate a log.
 
 ```
 logger test
@@ -626,13 +623,6 @@ Feb  9 16:31:36 localhost vagrant: test
 ```
 
 
-* How do I remove it?
-
-Stop the container and remove the image
-
-```
-atomic uninstall docker-registry.usersys.redhat.com/sct_/rsyslog:latest
-```
 
 How do I use it (scenario 2: remote logging)?
 
@@ -670,45 +660,13 @@ Feb 10 09:40:05 localhost vagrant: remote test
 Feb 10 09:40:07 localhost vagrant: remote test
 ```
 
+* How do I remove it?
 
+Stop the container and remove the image
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
+atomic uninstall docker-registry.usersys.redhat.com/sct_/rsyslog:latest
+```
 
 
 ###Using sadc
