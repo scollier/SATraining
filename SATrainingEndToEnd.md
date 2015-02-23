@@ -538,13 +538,20 @@ Of course this just scratches the surface. I recommend you head off to the kuber
 
 ## Use SPCs on the Atomic Hosts
 
+The goal here is to explore some of the images that we will be distributing when Atomic GAs.  We are trying to keep the Atomic image as small as possible where it makes sense.  This means that anything else that gets added to the Atomic host will have to be inside a container.  The examples we will go over in this section are rsyslog, sadc and rhel-tools.  For this to work you need at least two functioning Atomic hosts.
+
 ###Using rsyslog
 
+The goal here is to explore how logging works on an Atomic host.  We will cover two scenarios:
+
+1. Quick smoke test to make sure logging is working on the localhost.
+2. Remote logging.  We will send some logs over the network.
 
 
 
 ###Using sadc
 
+The sadc container is our "system activity data collector", it is the daemon that runs in the background that provides the ongoing performance data that sar parses and presents to you.  This container is meant to run in the background only, it is not an interactive container like rhel-tools.
 
 
 
