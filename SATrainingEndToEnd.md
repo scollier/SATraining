@@ -542,10 +542,158 @@ The goal here is to explore some of the images that we will be distributing when
 
 ###Using rsyslog
 
-The goal here is to explore how logging works on an Atomic host.  We will cover two scenarios:
+The rsyslog container runs in the background for the purposes of managing logs. We will cover two scenarios:
 
 1. Quick smoke test to make sure logging is working on the localhost.
 2. Remote logging.  We will send some logs over the network.
+
+
+* Check the environment before.
+
+```
+docker images
+REPOSITORY                                               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+
+docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+
+* Install the container.
+
+```
+atomic install docker-registry.usersys.redhat.com/sct_/rsyslog:latest
+Pulling repository docker-registry.usersys.redhat.com/sct_/rsyslog
+72a653be27ae: Download complete
+1c83bb3630b8: Download complete
+71c475dd72ea: Download complete
+d4677795c418: Download complete
+7ebacaa5cc3a: Download complete
+f5b3ea7dd485: Download complete
+ce5395955eb2: Download complete
+6e7486661b9d: Download complete
+2a812e24a31d: Download complete
+ebe911e2eb41: Download complete
+04bb173ac0bc: Download complete
+156aad864a90: Download complete
+Status: Downloaded newer image for docker-registry.usersys.redhat.com/sct_/rsyslog:latest
+docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=docker-registry.usersys.redhat.com/sct_/rsyslog:latest -e NAME=rsyslog docker-registry.usersys.redhat.com/sct_/rsyslog:latest /bin/install.sh
+```
+
+* Check the environment after the install.
+
+```
+docker images
+REPOSITORY                                        TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+docker-registry.usersys.redhat.com/sct_/rsyslog   latest              72a653be27ae        47 hours ago        355.9 MB
+
+docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+
+* Run it         
+
+```
+atomic run --name rsyslog docker-registry.usersys.redhat.com/sct_/rsyslog:latest docker run -d --privileged --name rsyslog -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log/journal:/run/log/journal -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -e IMAGE=docker-registry.usersys.redhat.com/sct_/rsyslog:latest -e NAME=rsyslog --restart=always docker-registry.usersys.redhat.com/sct_/rsyslog:latest /bin/rsyslog.sh
+140de8dc0103b5a39b07455d29591313024c30ba2df7290ac39eff68371eeb00
+```
+
+* Check the environment
+
+```
+docker ps
+CONTAINER ID        IMAGE                                                    COMMAND             CREATED             STATUS              PORTS               NAMES
+140de8dc0103        docker-registry.usersys.redhat.com/sct_/rsyslog:latest   "/bin/rsyslog.sh"   5 seconds ago       Up 1 seconds                            rsyslog    
+```
+
+How do I use it (scenario 1: single host smoke test)?
+
+In one terminal, watch the logs
+
+# tail -f /var/log/messages
+
+In another terminal, generate a log
+
+# logger test
+
+Back in the first terminal, you should see an entry with “test”
+
+Feb  9 16:31:36 localhost vagrant: test
+
+
+How do I remove it?
+
+Stop the container and remove the image
+
+# atomic uninstall docker-registry.usersys.redhat.com/sct_/rsyslog:latest
+
+How do I use it (scenario 2: remote logging)?
+
+Configure the client by pointing it to the rsyslog server in the /etc/rsyslog.conf
+
+*.* @@192.168.121.249:514
+
+
+Configure the rsyslog server; ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog.
+
+
+$ModLoad imklog # reads kernel messages (the same are read from journald)
+$ModLoad imudp
+$UDPServerRun 514
+$ModLoad imtcp
+$InputTCPServerRun 514
+$template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
+*.* ?FILENAME
+
+      2.  Test the configuration.
+
+On the Atomic host open a terminal and issue: “logger remote test”
+
+On the rsyslog server, check in the /var/log/ directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a syslog.log file.  Watch that file.
+
+# tail -f /var/log/192.168.121.228/syslog.log
+Feb 10 09:40:01 localhost CROND[6210]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+Feb 10 09:40:03 localhost vagrant: remote test
+Feb 10 09:40:05 localhost vagrant: remote test
+Feb 10 09:40:07 localhost vagrant: remote test
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
