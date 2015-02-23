@@ -494,23 +494,25 @@ journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
 ```
 
 
-* After the pod is deployed, you can also list the pod.
+* After the pod is deployed, you can also list the pod.  I have a few pods running here.
 
 ```
-# /usr/bin/kubectl get pods
-ID IMAGE(S) HOST LABELS STATUS
-apache fedora/apache 192.168.121.65/ name=apache Running
+# kubectl get pods
+POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
+apache              10.0.53.3           master              fedora/apache       192.168.121.147/    name=apache         Running
+mysql               10.0.73.2           mysql               mysql               192.168.121.101/    name=mysql          Running
+redis-master        10.0.53.2           master              dockerfile/redis    192.168.121.147/    name=redis-master   Running
 ```
 
-The state might be 'Waiting'. This indicates that docker is still attempting to download and launch the container.
+The state might be 'Pending'. This indicates that docker is still attempting to download and launch the container.
 
 * You can get even more information about the pod like this.
 
 ```
-kubectl get --output=json pods/apache | python -mjson.tool
+kubectl get pods --output=json apache
 ```
 
-* Finally, on the minion (fed-minion), check that the service is available, running, and functioning.
+* Finally, on the minion (minion), check that the service is available, running, and functioning.
 
 ```
 docker images
@@ -534,5 +536,6 @@ Apache
 
 Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the guestbook example. It's a bit more complicated but should expose you to more functionality.
 
-You can play around with other Fedora images by building from Fedora Dockerfiles.
 
+
+Use SPCs on the Atomic Hosts
