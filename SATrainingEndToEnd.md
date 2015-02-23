@@ -625,7 +625,13 @@ Feb  9 16:31:36 localhost vagrant: test
 
 ####Scenario 2: Remote Logging
 
-Stop the rsyslog container on the master node.  We are going to make a change to the /etc/rsyslog.conf file and we will need to re-read that.  Use _docker stop <container id>_ to stop the container.
+Stop the rsyslog container on the master node.  We are going to make a change to the /etc/rsyslog.conf file and we will need to re-read that.  Use following steps to stop the container.
+
+
+```
+docker ps
+docker stop \<container id\>
+```
 
 
 On the master node, point it to the rsyslog server in the /etc/rsyslog.conf.  Substitute your IP address here. The entry below is at the bottom of the file.
