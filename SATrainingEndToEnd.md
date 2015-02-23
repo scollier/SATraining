@@ -14,81 +14,8 @@ Pre-Requisites: Functioning libvirt backed Vagrant on Fedora
 
 
 #**Deployment**
-There are many ways to deploy an Atomic host.  In this lab, we provide guidance for Vagrant or KVM.  Pick one and go with that.
+There are many ways to deploy an Atomic host.  In this lab, we provide guidance for KVM.
 
-
-##**Deploy an Atomic Host on Vagrant.**
-
-* Install Vagrant using these instructions:
-
-```
-https://mojo.redhat.com/docs/DOC-998450
-```
-
-* You will need the following Vagrant plugins.
-
-```
-vagrant-libvirt (0.0.20)
-vagrant-registration (0.0.7)
-```
-
-* Grab the image and add it to Vagrant
-
-```
-wget http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/images/20150217.0/cloud/rhel-atomic-host-cloud-vagrant-libvirt.box
-vagrant box add atomichostga ./rhel-atomic-host-cloud-vagrant-libvirt.box
-```
-
-* Bring up the Atomic hosts with the following example Vagrantfile:
-
-```
--*- mode: ruby -*-
-vi: set ft=ruby :
-
-	
-Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
-
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "atomichostga"
-  config.vm.define :atomic1 do |atomic1|
-  config.ssh.forward_x11 = true
-  config.registration.subscriber_username = '<RHN_USERNAME_HERE>'
-  config.registration.subscriber_password = '<RHN_PASSWORD_HERE>'
-  config.vm.synced_folder ".", "/home/cloud-user/vagrant", type: "rsync"
-  config.vm.synced_folder ".", "/vagrant/", disabled: true
-  config.registration.force = true 
-  end
-
-  config.vm.define :atomic2 do |atomic2|
-  config.ssh.forward_x11 = true
-  config.registration.subscriber_username = '<RHN_USERNAME_HERE>'
-  config.registration.subscriber_password = '<RHN_PASSWORD_HERE>'
-  config.vm.synced_folder ".", "/home/cloud-user/vagrant", type: "rsync"
-  config.vm.synced_folder ".", "/vagrant/", disabled: true
-  config.registration.force = true 
-  end
-
-  config.vm.define :atomic3 do |atomic3|
-  config.ssh.forward_x11 = true
-  config.registration.subscriber_username = '<RHN_USERNAME_HERE>'
-  config.registration.subscriber_password = '<RHN_PASSWORD_HERE>'
-  config.vm.synced_folder ".", "/home/cloud-user/vagrant", type: "rsync"
-  config.vm.synced_folder ".", "/vagrant/", disabled: true
-  config.registration.force = true 
-  end
-end
-```
-
-* Confirm the Atomic hosts are up and running.
-
-```
-vagrant status | grep atomic
-atomic1                   running (libvirt)
-atomic2                   running (libvirt)
-atomic3                   running (libvirt)
-```
 
 ##**Deploy Atomic Hosts on KVM**
 
@@ -463,17 +390,17 @@ done
 
 ***We need to configure the kubelet and start the kubelet and proxy***
 
-* Edit /etc/kubernetes/kubelet to appear as such:
+* Edit /etc/kubernetes/kubelet to appear as below.  Make sure you substitute you kubelet / minion IP addresses appropriately.
 
 ```       
 # The address for the info server to serve on
-KUBELET_ADDRESS="--address=0.0.0.0"
+KUBELET_ADDRESS="--address=x.x.x.x"
 
 # The port for the info server to serve on
 KUBELET_PORT="--port=10250"
 
 # You may leave this blank to use the actual hostname
-KUBELET_HOSTNAME="--hostname_override=minion"
+KUBELET_HOSTNAME="--hostname_override=x.x.x.x"
 
 # Add your own!
 KUBELET_ARGS=""
@@ -554,7 +481,7 @@ kubectl create -f apache.json
 
 
 * You can monitor progress of the operations with these commands:
-On the master (fed-master) -
+On the master (master) -
 
 ```
 journalctl -f -l -xn -u kube-apiserver -u etcd -u kube-scheduler
@@ -602,7 +529,7 @@ Apache
 * To delete the container.
 
 ```
-# /usr/bin/kubectl --server=http://fed-master:8080 delete pod apache
+# /usr/bin/kubectl --server=http://master:8080 delete pod apache
 ```
 
 Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the guestbook example. It's a bit more complicated but should expose you to more functionality.
