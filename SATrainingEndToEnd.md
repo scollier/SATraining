@@ -704,7 +704,42 @@ atomic uninstall docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2
 
 The sadc container is our "system activity data collector", it is the daemon that runs in the background that provides the ongoing performance data that sar parses and presents to you.  This container is meant to run in the background only, it is not an interactive container like rhel-tools.
 
+* Do this on these steps on the master node only.  Install the sadc container.
 
+```
+atomic install sadc-docker
+```
+
+* stat the files.
+
+```
+stat /etc/cron.d/sysstat /etc/sysconfig/sysstat /etc/sysconfig/sysstat.ioconf /usr/local/bin/sysstat.sh
+```
+
+* Run the container.
+
+```
+atomic run sadc-docker
+```
+
+* stat the files again.
+
+```
+stat /var/log/sa/sa*
+```
+
+* Run the container.
+
+```
+-bash-4.2# atomic run docker-registry.usersys.redhat.com/atomicga/rhel-tools-docker-7.1-7.x86_64
+docker run -it --name rhel-tools-docker-7.1-7.x86_64 --privileged --net=host --pid=host -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host docker-registry.usersys.redhat.com/atomicga/rhel-tools-docker-7.1-7.x86_64
+```
+
+Run sar and check the output.
+
+```
+sar
+```
 
 
 ###Using rhel-tools
