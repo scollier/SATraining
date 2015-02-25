@@ -405,6 +405,9 @@ KUBE_LOG_LEVEL="--v=0"
 
 # Should this cluster be allowed to run privileged docker containers
 KUBE_ALLOW_PRIV="--allow_privileged=false"
+
+# How the replication controller and scheduler find the apiserver
+KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 ```
 
 ####Configure the kubernetes services on the master
@@ -417,9 +420,6 @@ KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:4001"
 
 # The address on the local server to listen to.
 KUBE_API_ADDRESS="--address=0.0.0.0"
-
-# How the replication controller and scheduler find the kube-apiserver
-KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Address range to use for services
 KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
@@ -466,6 +466,13 @@ KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Add your own!
 KUBELET_ARGS=""
+```
+
+* edit `/etc/kubernetes/proxy` to appear as below.
+
+```
+# How the proxy find the apiserver
+KUBE_PROXY_ARGS="--master=http://MASTER_PRIV_IP_ADDR:8080"
 ```
 
 * Start the appropriate services on the minions.
