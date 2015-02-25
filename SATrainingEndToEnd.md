@@ -157,15 +157,15 @@ systemctl status etcd
 * Configure Flannel by creating a flannel-config.json in your current directory.  The contents should be:
 
 
-**NOTE:** For OpenStack choose a routable IP range that is *NOT* part of the public IP address range.
+**NOTE:** Choose an IP range that is *NOT* part of the public IP address range.
 
 ```
 {
-"Network": "10.0.0.0/16",
-"SubnetLen": 24,
-"Backend": {
-"Type": "vxlan",
-"VNI": 1
+    "Network": "10.0.0.0/16",
+    "SubnetLen": 24,
+    "Backend": {
+        "Type": "vxlan",
+        "VNI": 1
      }
 }
 
@@ -198,7 +198,7 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
 cp /etc/sysconfig/flanneld{,.orig}
 ```
 
-* Configure flannel using the network interface of the system. This is commonly `eth0` but might be `ens3`. Use `ip a` to list network interfaces.
+* Configure flannel using the network interface of the system. This is commonly `eth0` but might be `ens3`. Use `ip a` to list network interfaces. This should not be necessary on most systems unless they have multiple network interfaces.  In which case you will want to use the interface capable of talking to other nodes in the cluster.
 
 ```
 sed -i 's/#FLANNEL_OPTIONS=""/FLANNEL_OPTIONS="eth0"/g' /etc/sysconfig/flanneld
@@ -238,7 +238,7 @@ systemctl status flanneld
 ip a
 ```
 
-* The docker and flannel network interfaces must match otherwise docker will fail to start. If Docker fails to load, or the flannel IP is not set correctly, reboot the system.
+* The docker and flannel network interfaces must match otherwise docker will fail to start. If Docker fails to load, or the flannel IP is not set correctly, reboot the system.  It is also possible to stop docker, delete the docker0 network interface, and then restart docker after flannel has started.  But rebooting is easier.
 
 Now that master is configured, lets configure the other nodes called "minions" (minion{1,2}).
 
@@ -291,7 +291,7 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.t
 cat /run/flannel/subnet.env
 ```
 
-* Check the network on the minion. Docker will fail to load if the docker and flannel network interfaces are not setup correctly. Reboot each minion. A functioning configuration should look like the following; notice the docker0 and flannel.1 interfaces.
+* Check the network on the minion. Docker will fail to load if the docker and flannel network interfaces are not setup correctly. Reboot each minion. Again it is possible to fix this by hand, but rebooting is easier.  A functioning configuration should look like the following; notice the docker0 and flannel.1 interfaces.
 
 
 ```
