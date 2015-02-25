@@ -14,10 +14,36 @@ Pre-Requisites: Functioning libvirt backed Vagrant on Fedora
 
 
 #**Deployment**
-There are many ways to deploy an Atomic host.  In this lab, we provide guidance for KVM.
+There are many ways to deploy an Atomic host.  In this lab, we provide guidance for OpenStack or local KVM.
+
+##**Deployment Option 1: Atomic Hosts on OpenStack**
+You may use the the Red Hat internal, HSS-supported **OS1** OpenStack service.
+
+1. PREREQUISITE: You must create an OS1 account and upload your SSH public key. Follow the ["Getting Started" instructions](https://mojo.redhat.com/docs/DOC-28082#jive_content_id_Getting_Started)
+1. Navigate to [Instances](https://control.os1.phx2.redhat.com/dashboard/project/instances/)
+1. Click "Launch Instances"
+1 Complete form
+  1. Details tab
+    * Instance name: arbitrary name. Note the UUID of the image will be appended to the instance name. You may want to use your name in the image so you can easily find it.
+    * Flavor: *m1.medium*
+    * Instance count: *3*
+    * Instance Boot Source: *Boot from image*
+      * Image name: *rhel-atomic-cloud-7.1-6*
+  1. Access & Security tab
+    * select you keypair that was uploaded during OS1 account setup. See [instructions](https://mojo.redhat.com/docs/DOC-28082#jive_content_id_Getting_Started)
+    * Security Groups: *Default*
+1. Click "Launch"
+
+Three VMs will be created. Once Power State is *Running* you may SSH into the VMs. Your SSH public key will be used.
+
+* SSH into the VMs with user `cloud-user` and the instance floating IP address. This address will be in the `10.3.xx.xx` range.
+
+```
+ssh cloud-user@10.3.xx.xxx
+```
 
 
-##**Deploy Atomic Hosts on KVM**
+##**Deployment Option 2: Atomic Hosts on KVM**
 
 * Grab and extract the Atomic and metadata images from our internal repo.  Use sudo and appropriate permissions.
 
@@ -47,6 +73,7 @@ virt-install --import --name atomic-ga-2 --ram 4096 --vcpus 2 --disk path=/var/l
 virt-install --import --name atomic-ga-3 --ram 4096 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-3.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
 ```
 
+##**Update VMs**
 * Confirm you can login to the hosts with:
 
 Username: cloud-user
