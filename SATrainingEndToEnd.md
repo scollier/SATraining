@@ -244,14 +244,14 @@ Now that master is configured, lets configure the other nodes called "minions" (
 
 **Perform the following on the other two atomic host minions:**
 
-* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your /etc/hosts file for name resolution here.  If there are any issues, just fall back to IP addresses for now. **NOTE:** For OpenStack nodes use the *private IP address* of the master.
+* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your `/etc/hosts` file for name resolution here.  If there are any issues, just fall back to IP addresses for now. **NOTE:** For OpenStack nodes use the *private IP address* of the master.
 
 
 ```
 curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
 ```
 
-For some of the steps below, it might help to set up ssh keys on the master and copy those over to the minions, e.g. with ssh-copy-id.  You also might want to set hostnames on the minions and edit your /etc/hosts files on all nodes to reflect that.
+For some of the steps below, it might help to set up ssh keys on the master and copy those over to the minions, e.g. with ssh-copy-id.  You also might want to set hostnames on the minions and edit your `/etc/hosts` files on all nodes to reflect that.
 
 From the master:
 
@@ -284,7 +284,7 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.t
 ```
 
 
-* From all nodes, review the /run/flannel/subnet.env file.  This file was generated automatically by flannel.
+* From all nodes, review the `/run/flannel/subnet.env` file.  This file was generated automatically by flannel.
 
 
 ```
@@ -501,7 +501,7 @@ NAME                LABELS              STATUS
 ##Deploy an application##
 
 
-* Create a file on master called apache.json that looks as such:
+* Create a file on master named `apache.json` that looks as such:
 
 ```
 {
@@ -540,16 +540,16 @@ NAME                LABELS              STATUS
 
 This json file is describing the attributes of the application environment. For example, it is giving it a "kind", "id", "name", "ports", and "image". Since the fedora/apache images doesn't exist in our environment yet, it will be pulled down automatically as part of the deployment process.
 
-For more information about which options can go in the schema, check out the docs on the kubernetes github page.
+For more information about which options can go in the schema, check out the docs on the [kubernetes github page](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs).
 
-* Deploy the fedora/apache image via the apache.json file.
+* Deploy the fedora/apache image via the `apache.json` file.
 
 ```
 kubectl create -f apache.json
 ```
 
 
-* You can monitor progress of the operations with these commands:
+* This command exits immediately, returning the value of the label, `apache`. You can monitor progress of the operations with these commands:
 On the master (master) -
 
 ```
@@ -603,7 +603,7 @@ Apache
 # /usr/bin/kubectl --server=http://master:8080 delete pod apache
 ```
 
-Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the guestbook example. It is a bit more complicated but should expose you to more functionality.
+Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the [guestbook example](https://github.com/GoogleCloudPlatform/kubernetes/tree/754a2a8305c812121c3845d8293efdd819b6a704/examples/guestbook-go). It is a bit more complicated but should expose you to more functionality.
 
 ## Use SPCs on the Atomic Hosts
 
@@ -697,7 +697,7 @@ Feb  9 16:31:36 localhost vagrant: test
 #THIS MIGHT NOT WORK FOR SA TRAINING.  THE PROBLEM IS THAT WE NEED TO ADD A --net=host TO THE LABEL.  SKIP THIS SECTION FOR NOW.  2/23/2015 - scollier
 
 
-Stop the rsyslog container on the master node.  We are going to make a change to the /etc/rsyslog.conf file and we will need to re-read that.  Use following steps to stop the container. After the container is stopped you can change the file and restart the container.
+Stop the rsyslog container on the master node.  We are going to make a change to the `/etc/rsyslog.conf` file and we will need to re-read that.  Use following steps to stop the container. After the container is stopped you can change the file and restart the container.
 
 ```
 docker ps
@@ -706,7 +706,7 @@ docker ps -a
 docker rm <container id>
 ```
 
-On the master node, point it to the rsyslog server in the /etc/rsyslog.conf.  Substitute your IP address here. The entry below is at the bottom of the file.
+On the master node, point it to the rsyslog server in the `/etc/rsyslog.conf`.  Substitute your IP address here. The entry below is at the bottom of the file.
 
 ```
 *.* @@192.168.121.147:514
@@ -720,7 +720,7 @@ atomic install --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
 
 
 
-* Ensure the following entries are in the /etc/rsyslog.conf.  Then restart rsyslog. First backup the file.
+* Ensure the following entries are in the `/etc/rsyslog.conf`.  Then restart rsyslog. First backup the file.
 
 ```
 cp /etc/rsyslog.conf{,.old}
@@ -746,9 +746,9 @@ atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
 * Test the configuration.
 
 
-* On the Atomic master host open a terminal, make sure rsyslog is started with atomic run, and issue: “logger remote test”
+* On the Atomic master host open a terminal, make sure rsyslog is started with atomic run, and issue command `logger remote test`
 
-* On the rsyslog server, check in the /var/log/ directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a syslog.log file.  Watch that file.
+* On the rsyslog server, check in the `/var/log/` directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a `syslog.log` file.  Watch that file.
 
 ```
 tail -f /var/log/192.168.121.228/syslog.log
@@ -936,6 +936,8 @@ sar
 ##**Troubleshooting**
 
 ### Restarting services
+
+Restart services in this order:
 
 1. etcd
 1. flanneld
