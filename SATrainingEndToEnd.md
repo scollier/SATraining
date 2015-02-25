@@ -1,8 +1,8 @@
 Demo: March 3rd-4th 2015
 Location: Westford
 
-Pre-Requisites: Functioning libvirt backed Vagrant on Fedora
-
+##**BEFORE YOU ARRIVE**
+    In order to make best use of the lab time please review the deployment options and ensure either 1) a working KVM environment or 2) access to the internal OpenStack OS1 environment.
 
 ##**Agenda / High Level Overview:**
 
@@ -36,6 +36,11 @@ You may use the the Red Hat internal, HSS-supported **OS1** OpenStack service.
 
 Three VMs will be created. Once Power State is *Running* you may SSH into the VMs. Your SSH public key will be used.
 
+* Note: Each instance requires a floating IP address in addition to the private OpenStack `172.x.x.x` address. Your OpenStack tenant may automatically assign a floating IP address. If not, you may need to assign it manually. If no floating IP addresses are available, create them.
+  1. Navigate to [Access & Security](https://control.os1.phx2.redhat.com/dashboard/project/access_and_security/)
+  1. Click "Floating IPs" tab
+  1. Click "Allocate IPs to project"
+  1. Assign floating IP addresses to each VM instance
 * SSH into the VMs with user `cloud-user` and the instance floating IP address. This address will be in the `10.3.xx.xx` range.
 
 ```
@@ -74,37 +79,57 @@ virt-install --import --name atomic-ga-3 --ram 4096 --vcpus 2 --disk path=/var/l
 ```
 
 ##**Update VMs**
-* Confirm you can login to the hosts with:
 
-Username: cloud-user
-Password: atomic
+**NOTE:** *We will be working on **all three (3)** VMs. You will probably want to have three terminal windows open.*
 
-Then: 
+* Confirm you can login to the hosts:
+
+    Username: cloud-user
+    Password: atomic (KVM only)
+
+* Enter sudo shell:
 
 ```
 sudo -i
 ```
+
 
 * Update all of the atomic hosts. The following commands will change you to the GA.staging tree, which should be what customers will see.
 
 ```
 ostree remote add --set=gpg-verify=false GA.brew http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/repo/
 rpm-ostree rebase GA.brew:rhel-atomic-host/7/x86_64/standard
-systemctl reboot 
+```
+This will fetch a new tree and display any RPM changes.
+
+* Check the atomic tree version
+
+```
+atomic host status
 ```
 
-* Check your version with atomic.
+Note the `*` identifies the active version.
+
+* Reboot the VMs to switch to updated tree.
+
+```
+systemctl reboot
+```
+
+* After the VMs have rebooted, SSH into each and enter sudo shell:
+
+```
+sudo -i
+```
+
+* Check your version with atomic. The `*` pointer should now be on the new tree.
 
 ```
 atomic host status
 ```
 
 
-
-
 #**Configure Flannel**
-
-* Open up 3 terminals and ssh into the Atomic hosts.
 
 * Check the versions of software you have.  This should be the same on all nodes.
 
@@ -112,17 +137,17 @@ atomic host status
 rpm -qa | egrep "etc|docker|flannel|kube"
 ```
 
-On the master node (pick one):
+Perform the following on the master node (pick one):
 
 * Look at networking before flannel configuration.
-       
+
 ```
 ip a
 ```
 
-* Start etcd on the master node.
+* Start etcd.
 
-       
+
 ```
 systemctl start etcd; systemctl status etcd
 ```
@@ -130,7 +155,7 @@ systemctl start etcd; systemctl status etcd
 
 * Configure Flannel by creating a flannel-config.json in your current directory.  The contents should be:
 
-       
+
 ```
 {
 "Network": "10.0.0.0/16",
@@ -143,51 +168,61 @@ systemctl start etcd; systemctl status etcd
 
 ```
 
-* Add the configuration to the etcd server.  Substitute out the IP address.
+* Add the configuration to the etcd server. Use the public IP address of the master node. If this is an OpenStack VM you will need to look up the public IP address on the OpenStack Horizon dashboard.
 
-       
+
 ```
 curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlencode value@flannel-config.json
 ```
 
+Example of successful output:
+
+```
+{"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n\"Network\": \"10.0.0.0/16\",\n\"SubnetLen\": 24,\n\"Backend\": {\n\"Type\": \"vxlan\",\n\"VNI\": 1\n     }\n}\n\n","modifiedIndex":3,"createdIndex":3}}
+```
 
 * Verify the key exists.
 
-       
+
 ```
 curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
 ```
 
 * Backup the flannel configuration file.
 
-       
+
 ```
 cp /etc/sysconfig/flanneld{,.orig}
 ```
 
-* Configure flannel, use your interface on your system.  Mine is eth0, yours might be ens3.
+* Configure flannel using the network interface of the system. This is commonly `eth0` but might be `ens3`. Use `ip a` to list network interfaces.
 
-       
 ```
 sed -i 's/#FLANNEL_OPTIONS=""/FLANNEL_OPTIONS="eth0"/g' /etc/sysconfig/flanneld
 ```
 
 
-* The /etc/sysconfig/flanneld should look like this (sub your IP for the FLANNEL_ETCD key).
+* Edit `/etc/sysconfig/flanneld` file with the public IP address of the master node.
 
-       
+
 ```
-grep -v ^\# /etc/sysconfig/flanneld
+# Flanneld configuration options
 
-FLANNEL_ETCD="http://192.168.121.105:4001"
+# etcd url location.  Point this to the server where etcd runs
+FLANNEL_ETCD="http://MASTER_PUBLIC_IPADDR:4001"
+
+# etcd config key.  This is the configuration key that flannel queries
+# For address range assignment
 FLANNEL_ETCD_KEY="/coreos.com/network"
+
+# Any additional options that you want to pass
 FLANNEL_OPTIONS="eth0"
 ```
 
 
 * Start up the flanneld service.
 
-       
+
 ```
 systemctl restart flanneld
 systemctl status flanneld
@@ -195,18 +230,18 @@ systemctl status flanneld
 
 * Check the interfaces on the host now. Notice there is now a flannel.1 interface.
 
-       
+
 ```
 ip a
 ```
 
-Now that master is configured, lets configure the minions (minion{1,2}).
+Now that master is configured, lets configure the other nodes called "minions" (minion{1,2}).
 
-From the minions:
+**Perform the following on the other two atomic host minions:**
 
-* Use curl to check firewall settings from the minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your /etc/hosts file for name resolution here.  If there are any issues, just fall back to IP addresses for now.
+* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your /etc/hosts file for name resolution here.  If there are any issues, just fall back to IP addresses for now.
 
-       
+
 ```
 curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
 ```
