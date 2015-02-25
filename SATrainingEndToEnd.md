@@ -100,7 +100,7 @@ sudo -i
 ostree remote add --set=gpg-verify=false GA.brew http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/repo/
 rpm-ostree rebase GA.brew:rhel-atomic-host/7/x86_64/standard
 ```
-This will fetch a new tree and display any RPM changes.
+This will fetch a new tree and display any RPM changes. **Note:** Customers will not have to add a remote. They will issue command `atomic host upgrade` then reboot.
 
 * Check the atomic tree version
 
@@ -149,12 +149,15 @@ ip a
 
 
 ```
-systemctl start etcd; systemctl status etcd
+systemctl start etcd; systemctl enable etcd
+systemctl status etcd
 ```
 
 
 * Configure Flannel by creating a flannel-config.json in your current directory.  The contents should be:
 
+
+**NOTE:** For OpenStack choose a routable IP range that is *NOT* part of the public IP address range.
 
 ```
 {
@@ -224,7 +227,7 @@ FLANNEL_OPTIONS="eth0"
 
 
 ```
-systemctl restart flanneld
+systemctl start flanneld; systemctl enable flanneld
 systemctl status flanneld
 ```
 
@@ -235,11 +238,13 @@ systemctl status flanneld
 ip a
 ```
 
+* The docker and flannel network interfaces must match otherwise docker will fail to start. If Docker fails to load, or the flannel IP is not set correctly, reboot the system.
+
 Now that master is configured, lets configure the other nodes called "minions" (minion{1,2}).
 
 **Perform the following on the other two atomic host minions:**
 
-* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your /etc/hosts file for name resolution here.  If there are any issues, just fall back to IP addresses for now.
+* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your /etc/hosts file for name resolution here.  If there are any issues, just fall back to IP addresses for now. **NOTE:** For OpenStack nodes use the *private IP address* of the master.
 
 
 ```
@@ -250,30 +255,30 @@ For some of the steps below, it might help to set up ssh keys on the master and 
 
 From the master:
 
-* Copy over flannel configuration to the minions, both of them.
+* Copy over flannel configuration to the minions, both of them. Use `scp` or copy the file contents manually.
 
-       
+
 ```
 scp /etc/sysconfig/flanneld x.x.x.x:/etc/sysconfig/.
 ```
 
 
-* From master, restart services on both of the minions.
-       
+* Restart flanneld on both of the minions.
+
 ```
-ssh root@x.x.x.x systemctl restart flanneld
-ssh root@x.x.x.x systemctl enable flanneld
+systemctl restart flanneld
+systemctl enable flanneld
 ```
 
-* From master, check the new interface on both of the minions.
-       
+* Check the new interface on both of the minions.
+
 ```
-ssh root@x.x.x.x ip a l flannel.1
+ip a l flannel.1
 ```
 
 From any node in the cluster, check the cluster members by issuing a query to etcd via curl.  You should see that three servers have consumed subnets.  You can associate those subnets to each server by the MAC address that is listed in the output.
 
-       
+
 ```
 curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.tool
 ```
@@ -281,23 +286,14 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.t
 
 * From all nodes, review the /run/flannel/subnet.env file.  This file was generated automatically by flannel.
 
-       
+
 ```
 cat /run/flannel/subnet.env
 ```
 
-* Restart docker on the minions and make sure it is running properly.
-       
-```
-systemctl daemon-reload
-systemctl restart docker
-systemctl enable docker
-systemctl status docker
-```
+* Check the network on the minion. Docker will fail to load if the docker and flannel network interfaces are not setup correctly. Reboot each minion. A functioning configuration should look like the following; notice the docker0 and flannel.1 interfaces.
 
-* Check the network on the minion. If Docker fails to load, or the flannel IP is not set correctly, reboot the system. A functioning configuration should look like the following; notice the docker0 and flannel.1 interfaces.
 
-       
 ```
 ip a
 1: lo:  mtu 65536 qdisc noqueue state UNKNOWN group default
@@ -334,7 +330,7 @@ From each minion, pull a Docker image for testing. In our case, we will use fedo
 
 * Issue the following on minion1.
 
-       
+
 ```
 docker run -it fedora:20 bash
 ```
@@ -926,4 +922,16 @@ sar
 ```
 
 
+##**Troubleshooting**
 
+### Restarting services
+
+1. etcd
+1. flanneld
+1. docker
+
+### Networking
+
+Flannel configures an overlay network that docker uses. `ip a` must show docker and flannel on the same network.
+
+Flannel has file `/usr/lib/systemd/system/docker.service.d/flannel.conf` which sources `/run/flannel/docker`, generated from the `flannel-config.json` file. etcd stores the flannel configuration for the Master. Flannel runs on each node host (minion) to setup a unique class-C container network.
