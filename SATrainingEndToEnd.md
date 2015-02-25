@@ -726,6 +726,10 @@ atomic uninstall docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2
 
 # END SKIP SECTION 2/23/2015 - scollier
 
+###Using rhel-tools
+
+
+
 
 ###Using sadc
 
@@ -734,40 +738,76 @@ The sadc container is our "system activity data collector", it is the daemon tha
 * Do this on these steps on the master node only.  Install the sadc container.
 
 ```
-atomic install sadc-docker
+# atomic install registry.access.stage.redhat.com/rhel7/sadc
+Pulling repository registry.access.stage.redhat.com/rhel7/sadc
+1a97a9cc4d1b: Download complete 
+Status: Downloaded newer image for registry.access.stage.redhat.com/rhel7/sadc:latest
+docker run --rm --privileged --name sadc -v /:/host -e HOST=/host -e IMAGE=registry.access.stage.redhat.com/rhel7/sadc -e NAME=name registry.access.stage.redhat.com/rhel7/sadc /usr/local/bin/sysstat-install.sh
+Installing file at /host//etc/cron.d/sysstat
+Installing file at /host//etc/sysconfig/sysstat
+Installing file at /host//etc/sysconfig/sysstat.ioconf
+Installing file at /host//usr/local/bin/sysstat.sh
 ```
 
-* stat the files.
+* check the status of the files.
 
 ```
 stat /etc/cron.d/sysstat /etc/sysconfig/sysstat /etc/sysconfig/sysstat.ioconf /usr/local/bin/sysstat.sh
+  File: ‘/etc/cron.d/sysstat’
+  Size: 339         Blocks: 8          IO Block: 4096   regular file
+Device: fd00h/64768d    Inode: 12659901    Links: 1
+Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: system_u:object_r:unlabeled_t:s0
+Access: 2015-02-25 01:38:01.277161028 +0000
+
+...<snip>...
+
+Modify: 2015-02-18 09:30:40.000000000 +0000
+Access: 2015-02-25 01:36:50.848936926 +0000
+Modify: 2015-02-18 09:30:40.000000000 +0000
+Change: 2015-02-25 01:37:39.262403129 +0000
+ Birth: -
+
 ```
 
-* Run the container.
+* Run the container. Ensure the container is running.
 
 ```
-atomic run sadc-docker
+# atomic run registry.access.stage.redhat.com/rhel7/sadc
+docker run -d --privileged --name sadc -v /etc/sysconfig/sysstat:/etc/sysconfig/sysstat -v /etc/sysconfig/sysstat.ioconf:/etc/sysconfig/sysstat.ioconf -v /var/log/sa:/var/log/sa -v /:/host -e HOST=/host -e IMAGE=registry.access.stage.redhat.com/rhel7/sadc -e NAME=sadc --net=host --restart=always registry.access.stage.redhat.com/rhel7/sadc /usr/local/bin/sysstat.sh
+79bf6243c05a9c1a07c7f987ac02b66264ff87ba84cc4714a24a48b3d526ebbc
+
+# docker ps -l
+CONTAINER ID        IMAGE                                               COMMAND                CREATED             STATUS              PORTS               NAMES
+79bf6243c05a        registry.access.stage.redhat.com/rhel7/sadc:7.1-3   "/usr/local/bin/syss"   33 seconds ago      Up 32 seconds                           sadc              
 ```
 
-* stat the files again.
+* Check the status of the files in /var/log/.
 
 ```
 stat /var/log/sa/sa*
+  File: ‘/var/log/sa/sa24’
+  Size: 656         Blocks: 8          IO Block: 4096   regular file
+Device: fd00h/64768d    Inode: 4229027     Links: 1
+Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: system_u:object_r:docker_log_t:s0
+Access: 2015-02-25 01:40:07.042784999 +0000
+Modify: 2015-02-25 01:40:07.042784999 +0000
+Change: 2015-02-25 01:40:07.042784999 +0000
+ Birth: -
 ```
 
-* Run the container.
+* Run the RHEL Tools container.
 
 ```
--bash-4.2# atomic run docker-registry.usersys.redhat.com/atomicga/rhel-tools-docker-7.1-7.x86_64
-docker run -it --name rhel-tools-docker-7.1-7.x86_64 --privileged --net=host --pid=host -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host docker-registry.usersys.redhat.com/atomicga/rhel-tools-docker-7.1-7.x86_64
+atomic install registry.access.stage.redhat.com/rhel7/rhel-tools
 ```
 
-Run sar and check the output.
+* Once inside the RHEL tools container, run sar and check the output.
 
 ```
 sar
 ```
 
 
-###Using rhel-tools
 
