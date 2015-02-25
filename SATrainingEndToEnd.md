@@ -337,7 +337,7 @@ docker run -it fedora:20 bash
 
 * This will place you inside the container. Check the IP address.
 
-       
+
 ```
 ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
@@ -353,7 +353,7 @@ You can see here that the IP address is on the flannel network.
 
 * Issue the following commands on minion2:
 
-       
+
 ```
 docker run -it fedora:20 bash
 
@@ -369,7 +369,7 @@ valid_lft forever preferred_lft forever
 
 * Now, from the container running on minion2, ping the container running on minion1:
 
-       
+
 ```
 ping 10.0.81.2
 PING 10.0.81.2 (10.0.81.2) 56(84) bytes of data.
@@ -383,15 +383,22 @@ PING 10.0.81.2 (10.0.81.2) 56(84) bytes of data.
 
 ##Configure Kubernetes##
 
-The kubernetes package provides a few services: kube-apiserver, kube-scheduler, kube-controller-manager, kubelet, kube-proxy.  These services are managed by systemd and the configuration resides in a central location: /etc/kubernetes. We will break the services up between the hosts.  The first host, master, will be the kubernetes master.  This host will run the kube-apiserver, kube-controller-manager, and kube-scheduler.  In addition, the master will also run _etcd_.  The remaining hosts, the minions will run kubelet, proxy, cadvisor and docker.
+The kubernetes package provides several services
 
-**Prepare the hosts:**
+* kube-apiserver
+* kube-scheduler
+* kube-controller-manager
+* kubelet, kube-proxy
 
-* Edit /etc/kubernetes/config which will be the same on all hosts to contain:
+These services are managed by systemd and the configuration resides in a central location, `/etc/kubernetes`. We will break the services up between the hosts.  The first host, *master*, will be the kubernetes master.  This host will run kube-apiserver, kube-controller-manager, and kube-scheduler. In addition, the master will also run _etcd_. The remaining hosts, the *minions* or *nodes*, will run kubelet, proxy, cadvisor and docker.
+
+###Prepare the hosts
+
+* Edit `/etc/kubernetes/config` to be the same on **all hosts**. For OpenStack VMs we will be using the *private IP address* of the master host.
 
 ```
 # Comma separated list of nodes in the etcd cluster
-KUBE_ETCD_SERVERS="--etcd_servers=http://master:4001"
+KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:4001"
 
 # logging to stderr means we get it in the systemd journal
 KUBE_LOGTOSTDERR="--logtostderr=true"
@@ -403,9 +410,9 @@ KUBE_LOG_LEVEL="--v=0"
 KUBE_ALLOW_PRIV="--allow_privileged=false"
 ```
 
-**Configure the kubernetes services on the master.**
+####Configure the kubernetes services on the master
 
-* Edit /etc/kubernetes/apiserver to appear as such:
+* Edit `/etc/kubernetes/apiserver` to appear as such:
 
 ```       
 # The address on the local server to listen to.
@@ -415,7 +422,7 @@ KUBE_API_ADDRESS="--address=0.0.0.0"
 KUBE_API_PORT="--port=8080"
 
 # How the replication controller and scheduler find the kube-apiserver
-KUBE_MASTER="--master=http://master:8080"
+KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Port minions listen on
 KUBELET_PORT="--kubelet_port=10250"
@@ -427,11 +434,11 @@ KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
 KUBE_API_ARGS=""
 ```
 
-* Edit /etc/kubernetes/controller-manager to appear as such.  Substitute your minion IPs here.:
+* Edit `/etc/kubernetes/controller-manager` to appear as such.  Substitute your minion IPs here.:
 
 ```
 # Comma separated list of minions
-KUBELET_ADDRESSES="--machines=MINION_IP_1,MINION_IP_2"
+KUBELET_ADDRESSES="--machines=MINION_PRIV_IP_1,MINION_PRIV_IP_2"
 ```
 
 * Start the appropriate services on master:
@@ -444,13 +451,15 @@ for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do
 done
 ```
 
-**Configure the kubernetes services on the minions.  Make changes on each minion.**
+####Configure the kubernetes services on the minions
+
+**NOTE:** Make these changes on each minion.
 
 ***We need to configure the kubelet and start the kubelet and proxy***
 
-* Edit /etc/kubernetes/kubelet to appear as below.  Make sure you substitute you kubelet / minion IP addresses appropriately.
+* Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet or minion IP addresses appropriately.
 
-```       
+```
 # The address for the info server to serve on
 KUBELET_ADDRESS="--address=x.x.x.x"
 
@@ -462,21 +471,21 @@ KUBELET_HOSTNAME="--hostname_override=x.x.x.x"
 
 # Add your own!
 KUBELET_ARGS=""
-```       
+```
 
-* Start the appropriate services on minion (minion).
+* Start the appropriate services on the minions.
 
 ```
-for SERVICES in kube-proxy kubelet docker; do 
+for SERVICES in kube-proxy kubelet docker; do
     systemctl restart $SERVICES
     systemctl enable $SERVICES
-    systemctl status $SERVICES 
+    systemctl status $SERVICES
 done
 ```
 
 *You should be finished!*
 
-* Check to make sure the cluster can see the minion (on master)
+* Check to make sure the cluster can see the minions from the master.
 
 ```
 # kubectl get minions
