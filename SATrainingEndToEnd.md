@@ -397,9 +397,6 @@ These services are managed by systemd and the configuration resides in a central
 * Edit `/etc/kubernetes/config` to be the same on **all hosts**. For OpenStack VMs we will be using the *private IP address* of the master host.
 
 ```
-# Comma separated list of nodes in the etcd cluster
-KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:4001"
-
 # logging to stderr means we get it in the systemd journal
 KUBE_LOGTOSTDERR="--logtostderr=true"
 
@@ -415,17 +412,14 @@ KUBE_ALLOW_PRIV="--allow_privileged=false"
 * Edit `/etc/kubernetes/apiserver` to appear as such:
 
 ```       
+# Comma separated list of nodes in the etcd cluster
+KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:4001"
+
 # The address on the local server to listen to.
 KUBE_API_ADDRESS="--address=0.0.0.0"
 
-# The port on the local server to listen on.
-KUBE_API_PORT="--port=8080"
-
 # How the replication controller and scheduler find the kube-apiserver
 KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
-
-# Port minions listen on
-KUBELET_PORT="--kubelet_port=10250"
 
 # Address range to use for services
 KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
@@ -461,13 +455,14 @@ done
 
 ```
 # The address for the info server to serve on
-KUBELET_ADDRESS="--address=x.x.x.x"
+KUBELET_ADDRESS="--address=0.0.0.0"
 
-# The port for the info server to serve on
-KUBELET_PORT="--port=10250"
-
-# You may leave this blank to use the actual hostname
+# this MUST match what you used in KUBELET_ADDRESSES on the controller manager
+# unless you used what hostname -f shows in KUBELET_ADDRESSES.
 KUBELET_HOSTNAME="--hostname_override=x.x.x.x"
+
+# how the kubelet finds the apiserver
+KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Add your own!
 KUBELET_ARGS=""
