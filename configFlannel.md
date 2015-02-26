@@ -196,14 +196,14 @@ valid_lft forever preferred_lft forever
 
 3: flannel.1:  mtu 1450 qdisc noqueue state UNKNOWN group default
 link/ether 82:73:b8:b2:2b:fe brd ff:ff:ff:ff:ff:ff
-inet 10.0.81.0/16 scope global flannel.1
+inet 18.0.81.0/16 scope global flannel.1
 valid_lft forever preferred_lft forever
 inet6 fe80::8073:b8ff:feb2:2bfe/64 scope link
 valid_lft forever preferred_lft forever
 
 4: docker0:  mtu 1500 qdisc noqueue state DOWN group default
 link/ether 56:84:7a:fe:97:99 brd ff:ff:ff:ff:ff:ff
-inet 10.0.81.1/24 scope global docker0
+inet 18.0.81.1/24 scope global docker0
 valid_lft forever preferred_lft forever
 ```
 
@@ -227,7 +227,7 @@ docker run -it fedora:20 bash
 ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
 link/ether 02:42:0a:00:51:02 brd ff:ff:ff:ff:ff:ff
-inet 10.0.81.2/24 scope global eth0
+inet 18.0.81.2/24 scope global eth0
 valid_lft forever preferred_lft forever
 inet6 fe80::42:aff:fe00:5102/64 scope link
 valid_lft forever preferred_lft forever
@@ -245,7 +245,7 @@ docker run -it fedora:20 bash
 ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
 link/ether 02:42:0a:00:45:02 brd ff:ff:ff:ff:ff:ff
-inet 10.0.69.2/24 scope global eth0
+inet 18.0.69.2/24 scope global eth0
 valid_lft forever preferred_lft forever
 inet6 fe80::42:aff:fe00:4502/64 scope link
 valid_lft forever preferred_lft forever
@@ -256,11 +256,11 @@ valid_lft forever preferred_lft forever
 
 
 ```
-ping 10.0.81.2
-PING 10.0.81.2 (10.0.81.2) 56(84) bytes of data.
-64 bytes from 10.0.81.2: icmp_seq=2 ttl=62 time=2.93 ms
-64 bytes from 10.0.81.2: icmp_seq=3 ttl=62 time=0.376 ms
-64 bytes from 10.0.81.2: icmp_seq=4 ttl=62 time=0.306 ms
+ping 18.0.81.2
+PING 18.0.81.2 (18.0.81.2) 56(84) bytes of data.
+64 bytes from 18.0.81.2: icmp_seq=2 ttl=62 time=2.93 ms
+64 bytes from 18.0.81.2: icmp_seq=3 ttl=62 time=0.376 ms
+64 bytes from 18.0.81.2: icmp_seq=4 ttl=62 time=0.306 ms
 ```
 
 * You should have received a reply. That is it. flannel is set up on the two minions and you have cross host communication. Etcd is set up on the master node. Next step is to overlay the cluster with kubernetes.
