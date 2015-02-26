@@ -46,7 +46,7 @@ systemctl status etcd
 
 ```json
 {
-    "Network": "18.0.0.0/16",
+    "Network": "10.0.0.0/16",
     "SubnetLen": 24,
     "Backend": {
         "Type": "vxlan",
@@ -65,7 +65,7 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlen
 Example of successful output:
 
 ```json
-{"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n    \"Network\": \"18.0.0.0/16\",\n    \"SubnetLen\": 24,\n    \"Backend\": {\n        \"Type\": \"vxlan\",\n        \"VNI\": 1\n     }\n}\n","modifiedIndex":3,"createdIndex":3}}-bash-4.2# 
+{"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n    \"Network\": \"10.0.0.0/16\",\n    \"SubnetLen\": 24,\n    \"Backend\": {\n        \"Type\": \"vxlan\",\n        \"VNI\": 1\n     }\n}\n","modifiedIndex":3,"createdIndex":3}}-bash-4.2# 
 ```
 
 * Verify the key exists.  Use the IP Address of your etcd / master node.
