@@ -2,7 +2,10 @@ Demo: March 3rd-4th 2015
 Location: Westford
 
 ##**BEFORE YOU ARRIVE**
-    In order to make best use of the lab time please review the deployment options and ensure either 1) a working KVM environment or 2) access to the internal OpenStack OS1 environment.
+    In order to make best use of the lab time please review the deployment options and ensure either 
+
+1) a working KVM environment or 
+2) access to the internal OpenStack OS1 environment.
 
 ##**Agenda / High Level Overview:**
 
