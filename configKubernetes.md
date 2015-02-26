@@ -73,7 +73,14 @@ done
 
 **NOTE:** Make these changes on each minion.
 
-***We need to configure the kubelet and start the kubelet and proxy***
+***We need to configure and start the kubelet and proxy***
+
+**UGLY** Due to a bug in kubernetes we must configure an empty JSON authorization file on each minion.
+* Create the JSON file by running the following on all minions
+
+```
+echo "{}" > /var/lib/kubelet/auth
+```
 
 * Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet or minion IP addresses appropriately. You have to make two changes below.
 
@@ -85,11 +92,11 @@ KUBELET_ADDRESS="--address=0.0.0.0"
 # unless you used what hostname -f shows in KUBELET_ADDRESSES.
 KUBELET_HOSTNAME="--hostname_override=LOCAL_MINION_ETH0_ADDRESS"
 
-# how the kubelet finds the apiserver
-KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
+# We are (mis)using KUBE_ETCD_SERVERS.  In a future release this will be KUBE_API_SERVERS.
+KUBE_ETCD_SERVERS="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Add your own!
-KUBELET_ARGS=""
+KUBELET_ARGS="--auth_file=/var/lib/kubelet/auth"
 ```
 
 * edit `/etc/kubernetes/proxy` to appear as below.
