@@ -225,7 +225,7 @@ CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 05c69c00ea48 fedora/apache:latest "/run-apache.sh" 2 minutes ago Up 2 minutes k8s--master.3f918229--apache.etcd--8cd6efe6_-_3a95_-_11e4_-_b618_-_5254005318cb--9bb78458
 ```
 
-* Create a service to make the pod discoverable
+## Create a service to make the pod discoverable ##
 
 Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Create a service on the master by creating the following json service definition.  Be sure to include an IP for a minion in your cluster!
 
@@ -261,7 +261,7 @@ Apache
 kubectl delete pod apache
 ```
 
-* Create a replication controller to control the pod
+## Create a replication controller to control the pod ##
 
 This should have the exact same definition of the pod as above, only now it is being controlled by a replication controller.  So if you delete the pod, or if the node disappears, the pod will be restarted elsewhere in the cluster!
 
