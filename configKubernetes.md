@@ -261,4 +261,61 @@ Apache
 kubectl delete pod apache
 ```
 
+* Create a replication controller to control the pod
+
+This should have the exact same definition of the pod as above, only now it is being controlled by a replication controller.  So if you delete the pod, or if the node disappears, the pod will be restarted elsewhere in the cluster!
+
+
+```json
+{
+    "apiVersion": "v1beta1",
+    "desiredState": {
+        "podTemplate": {
+            "desiredState": {
+                "manifest": {
+                    "containers": [
+                        {
+                            "image": "fedora/apache",
+                            "name": "my-fedora-apache",
+                            "ports": [
+                                {
+                                    "containerPort": 80,
+                                    "protocol": "TCP"
+                                }
+                            ]
+                        }
+                    ],
+                    "id": "apache",
+                    "restartPolicy": {
+                        "always": {}
+                    },
+                    "version": "v1beta1",
+                    "volumes": null
+                }
+            },
+            "labels": {
+                "name": "apache"
+            }
+        },
+        "replicaSelector": {
+            "name": "apache"
+        },
+        "replicas": 1
+    },
+    "id": "apache-controller",
+    "kind": "ReplicationController",
+    "labels": {
+        "name": "apache"
+    }
+}
+```
+
+Fell free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes publicIP balances between ALL of the replics!
+
+```bash
+kubectl resize --replicas=3 replicationController apache-controller
+```
+
+I suggest you resize to 0 before you delete the replication controller.  Deleting a replicationController will leave the pods running.
+
 Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the [guestbook example](https://github.com/GoogleCloudPlatform/kubernetes/tree/754a2a8305c812121c3845d8293efdd819b6a704/examples/guestbook-go). It is a bit more complicated but should expose you to more functionality.
