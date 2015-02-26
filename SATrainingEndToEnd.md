@@ -483,7 +483,7 @@ done
 
 ***We need to configure the kubelet and start the kubelet and proxy***
 
-* Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet or minion IP addresses appropriately.
+* Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet or minion IP addresses appropriately. You have to make two changes below.
 
 ```
 # The address for the info server to serve on
@@ -491,7 +491,7 @@ KUBELET_ADDRESS="--address=0.0.0.0"
 
 # this MUST match what you used in KUBELET_ADDRESSES on the controller manager
 # unless you used what hostname -f shows in KUBELET_ADDRESSES.
-KUBELET_HOSTNAME="--hostname_override=x.x.x.x"
+KUBELET_HOSTNAME="--hostname_override=LOCAL_MINION_ETH0_ADDRESS"
 
 # how the kubelet finds the apiserver
 KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
@@ -588,7 +588,7 @@ On the master (master) -
 journalctl -f -l -xn -u kube-apiserver -u etcd -u kube-scheduler
 ```
 
-* On the minion (fed-minion) -
+* On the minion (minion) -
 
 ```
 journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
