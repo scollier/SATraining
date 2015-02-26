@@ -156,7 +156,6 @@ NAME                LABELS              STATUS
               "ports": [
             {
               "containerPort": 80,
-              "hostPort": 80,
               "protocol": "TCP"
             }
           ],
@@ -185,7 +184,7 @@ kubectl create -f apache.json
 On the master (master) -
 
 ```
-journalctl -f -l -xn -u kube-apiserver -u etcd -u kube-scheduler
+journalctl -f -l -xn -u kube-apiserver -u kube-scheduler
 ```
 
 * On the minion (minion) -
@@ -213,7 +212,7 @@ The state might be 'Pending'. This indicates that docker is still attempting to 
 kubectl get pods --output=json apache
 ```
 
-* Finally, on the minion (minion), check that the service is available, running, and functioning.
+* Finally, on the minion (minion), check that the pod is available and running.
 
 ```
 docker images
@@ -224,9 +223,36 @@ fedora/apache latest 6927a389deb6 3 months ago 450.6 MB
 docker ps -l
 CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 05c69c00ea48 fedora/apache:latest "/run-apache.sh" 2 minutes ago Up 2 minutes k8s--master.3f918229--apache.etcd--8cd6efe6_-_3a95_-_11e4_-_b618_-_5254005318cb--9bb78458
+```
 
-curl http://localhost
-Apache
+* Create a service to make the pod discoverable
+
+Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Create a service on the master by creating the following json service definition.  Be sure to include an IP for a minion in your cluster!
+
+```json
+{
+  "id": "frontend",
+  "kind": "Service",
+  "apiVersion": "v1beta1",
+  "port": 80,
+  "publicIPs": [
+    "MINION_PRIV_IP_1",
+  ],
+  "containerPort": 80,
+  "selector": {
+    "name": "apache"
+  },
+  "labels": {
+    "name": "frontend"
+  }
+}
+```
+
+* Finally, test that the container is actually working.
+
+```
+curl http://MINION_PRIV_IP_1:80/
+-Apache
 ```
 
 * To delete the container.
