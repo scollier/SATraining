@@ -403,6 +403,8 @@ PING 10.0.81.2 (10.0.81.2) 56(84) bytes of data.
 
 Do not move forward until you can ping from container to container on different hosts.
 
+Exit the containers on each node when finished.
+
 
 ##Configure Kubernetes##
 
@@ -416,6 +418,13 @@ The kubernetes package provides several services
 These services are managed by systemd and the configuration resides in a central location, `/etc/kubernetes`. We will break the services up between the hosts.  The first host, *master*, will be the kubernetes master.  This host will run kube-apiserver, kube-controller-manager, and kube-scheduler. In addition, the master will also run _etcd_. The remaining hosts, the *minions* or *nodes*, will run kubelet, proxy, cadvisor and docker.
 
 ###Prepare the hosts
+
+* Backup the kubernetes configuration files on each system (master and nodes) before continuing.
+
+```
+for i in $(ls /etc/kubernetes/*); do cp $i{,.orig}; echo "Making a backup of $i"; done
+```
+
 
 * Edit `/etc/kubernetes/config` to be the same on **all hosts**. For OpenStack VMs we will be using the *private IP address* of the master host.
 
