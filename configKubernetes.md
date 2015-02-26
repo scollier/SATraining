@@ -137,35 +137,35 @@ NAME                LABELS              STATUS
 
 ```json
 {
-        "apiVersion": "v1beta1",
-        "kind": "Pod",
-        "id": "apache",
-        "namespace": "default",
-        "labels": {
-          "name": "apache"
-        },
-        "desiredState": {
-          "manifest": {
-          "version": "v1beta1",
-          "id": "apache",
-          "volumes": null,
-          "containers": [
-            {
-              "name": "master",
-              "image": "fedora/apache",
-              "ports": [
-            {
-              "containerPort": 80,
-              "protocol": "TCP"
-            }
-          ],
+    "apiVersion": "v1beta1",
+    "desiredState": {
+        "manifest": {
+            "containers": [
+                {
+                    "image": "fedora/apache",
+                    "name": "my-fedora-apache",
+                    "ports": [
+                        {
+                            "containerPort": 80,
+                            "protocol": "TCP"
+                        }
+                    ]
+                }
+            ],
+            "id": "apache",
+            "restartPolicy": {
+                "always": {}
+            },
+            "version": "v1beta1",
+            "volumes": null
         }
-      ],
-      "restartPolicy": {
-      "always": {}
-      }
     },
-  },
+    "id": "apache",
+    "kind": "Pod",
+    "labels": {
+        "name": "apache"
+    },
+    "namespace": "default"
 }
 ```
 
@@ -199,7 +199,7 @@ journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
 ```
 # kubectl get pods
 POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-apache              18.0.53.3           master              fedora/apache       192.168.121.147/    name=apache         Running
+apache              18.0.53.3           my-fedora-apache    fedora/apache       192.168.121.147/    name=apache         Running
 mysql               18.0.73.2           mysql               mysql               192.168.121.101/    name=mysql          Running
 redis-master        18.0.53.2           master              dockerfile/redis    192.168.121.147/    name=redis-master   Running
 ```
@@ -231,28 +231,28 @@ Now that the pod is known to be running we need a way to find it.  Pods in kuber
 
 ```json
 {
-  "id": "frontend",
-  "kind": "Service",
-  "apiVersion": "v1beta1",
-  "port": 80,
-  "publicIPs": [
-    "MINION_PRIV_IP_1",
-  ],
-  "containerPort": 80,
-  "selector": {
-    "name": "apache"
-  },
-  "labels": {
-    "name": "frontend"
-  }
+    "apiVersion": "v1beta1",
+    "containerPort": 80,
+    "id": "frontend",
+    "kind": "Service",
+    "labels": {
+        "name": "frontend"
+    },
+    "port": 80,
+    "publicIPs": [
+        "MINION_PRIV_IP_1"
+    ],
+    "selector": {
+        "name": "apache"
+    }
 }
 ```
 
 * Finally, test that the container is actually working.
 
 ```
-curl http://MINION_PRIV_IP_1:80/
--Apache
+curl http://MINION_PRIV_IP_1/
+Apache
 ```
 
 * To delete the container.
