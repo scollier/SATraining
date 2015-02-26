@@ -13,10 +13,11 @@ These services are managed by systemd and the configuration resides in a central
 
 * Backup the kubernetes configuration files on each system (master and nodes) before continuing.
 
-```
+```bash
 for i in $(ls /etc/kubernetes/*); do cp $i{,.orig}; echo "Making a backup of $i"; done
 ```
 
+**NOTE:** It is important that you replace any exsiting content in the config files below with the new content provided.  You will find that the existing content in the config files may not match what is provided below.  This is expected.
 
 * Edit `/etc/kubernetes/config` to be the same on **all hosts**. For OpenStack VMs we will be using the *private IP address* of the master host.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.
 
@@ -61,7 +62,7 @@ KUBELET_ADDRESSES="--machines=MINION_PRIV_IP_1,MINION_PRIV_IP_2"
 
 * Start the appropriate services on master:
 
-```
+```bash
 for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do 
     systemctl restart $SERVICES
     systemctl enable $SERVICES
@@ -78,7 +79,7 @@ done
 **UGLY** Due to a bug in kubernetes we must configure an empty JSON authorization file on each minion.
 * Create the JSON file by running the following on all minions
 
-```
+```bash
 echo "{}" > /var/lib/kubelet/auth
 ```
 
@@ -108,7 +109,7 @@ KUBE_PROXY_ARGS="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 * Start the appropriate services on the minions.
 
-```
+```bash
 for SERVICES in kube-proxy kubelet docker; do
     systemctl restart $SERVICES
     systemctl enable $SERVICES
@@ -134,7 +135,7 @@ NAME                LABELS              STATUS
 
 * Create a file on master named `apache.json` that looks as such:
 
-```
+```json
 {
         "apiVersion": "v1beta1",
         "kind": "Pod",
@@ -199,9 +200,9 @@ journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
 ```
 # kubectl get pods
 POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-apache              10.0.53.3           master              fedora/apache       192.168.121.147/    name=apache         Running
-mysql               10.0.73.2           mysql               mysql               192.168.121.101/    name=mysql          Running
-redis-master        10.0.53.2           master              dockerfile/redis    192.168.121.147/    name=redis-master   Running
+apache              18.0.53.3           master              fedora/apache       192.168.121.147/    name=apache         Running
+mysql               18.0.73.2           mysql               mysql               192.168.121.101/    name=mysql          Running
+redis-master        18.0.53.2           master              dockerfile/redis    192.168.121.147/    name=redis-master   Running
 ```
 
 The state might be 'Pending'. This indicates that docker is still attempting to download and launch the container.
@@ -231,7 +232,7 @@ Apache
 * To delete the container.
 
 ```
-# /usr/bin/kubectl --server=http://master:8080 delete pod apache
+kubectl delete pod apache
 ```
 
 Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the [guestbook example](https://github.com/GoogleCloudPlatform/kubernetes/tree/754a2a8305c812121c3845d8293efdd819b6a704/examples/guestbook-go). It is a bit more complicated but should expose you to more functionality.
