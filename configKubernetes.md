@@ -96,7 +96,7 @@ KUBELET_HOSTNAME="--hostname_override=LOCAL_MINION_ETH0_ADDRESS"
 KUBE_ETCD_SERVERS="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Add your own!
-KUBELET_ARGS="--auth_file=/var/lib/kubelet/auth"
+KUBELET_ARGS="--auth_path=/var/lib/kubelet/auth"
 ```
 
 * edit `/etc/kubernetes/proxy` to appear as below.
