@@ -4,8 +4,8 @@ Location: Westford
 ##**BEFORE YOU ARRIVE**
     In order to make best use of the lab time please review the deployment options and ensure either 
 
-1) a working KVM environment or 
-2) access to the internal OpenStack OS1 environment.
+1. A working KVM environment or
+2. Access to the internal OpenStack OS1 environment.
 
 ##**Agenda / High Level Overview:**
 
