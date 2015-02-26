@@ -100,6 +100,7 @@ sudo -i
 * Update all of the atomic hosts. The following commands will change you to the GA.staging tree, which should be what customers will see.
 
 ```
+atomic host status
 ostree remote add --set=gpg-verify=false GA.brew http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/repo/
 rpm-ostree rebase GA.brew:rhel-atomic-host/7/x86_64/standard
 ```
@@ -134,10 +135,26 @@ atomic host status
 
 #**Configure Flannel**
 
-* Check the versions of software you have.  This should be the same on all nodes.
+* Check and explore the versions of software you have.  This should be the same on all nodes.
 
 ```
 rpm -qa | egrep "etc|docker|flannel|kube"
+rpm -ql docker
+rpm -ql etcd
+rpm -ql kubernetes
+rpm -ql flannel
+rpm -qi docker
+rpm -qi etcd
+rpm -qi kubernetes
+rpm -qi flannel
+rpm -qd docker
+rpm -qd etcd
+rpm -qd kubernetes
+rpm -qi flannel
+rpm -qc docker
+rpm -qc etcd
+rpm -qc kubernetes
+rpm -qc flannel
 ```
 
 Perform the following on the master node (pick one):
@@ -164,7 +181,7 @@ systemctl status etcd
 
 ```
 {
-    "Network": "10.0.0.0/16",
+    "Network": "18.0.0.0/16",
     "SubnetLen": 24,
     "Backend": {
         "Type": "vxlan",
@@ -184,10 +201,10 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlen
 Example of successful output:
 
 ```
-{"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n\"Network\": \"10.0.0.0/16\",\n\"SubnetLen\": 24,\n\"Backend\": {\n\"Type\": \"vxlan\",\n\"VNI\": 1\n     }\n}\n\n","modifiedIndex":3,"createdIndex":3}}
+{"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n    \"Network\": \"18.0.0.0/16\",\n    \"SubnetLen\": 24,\n    \"Backend\": {\n        \"Type\": \"vxlan\",\n        \"VNI\": 1\n     }\n}\n","modifiedIndex":3,"createdIndex":3}}-bash-4.2# 
 ```
 
-* Verify the key exists.
+* Verify the key exists.  Use the IP Address of your etcd / master node.
 
 
 ```
@@ -208,14 +225,14 @@ sed -i 's/#FLANNEL_OPTIONS=""/FLANNEL_OPTIONS="eth0"/g' /etc/sysconfig/flanneld
 ```
 
 
-* Edit `/etc/sysconfig/flanneld` file with the public IP address of the master node.
+* Edit `/etc/sysconfig/flanneld` file with the public IP address of the master node. You must make a change here.
 
 
 ```
 # Flanneld configuration options
 
 # etcd url location.  Point this to the server where etcd runs
-FLANNEL_ETCD="http://MASTER_PUBLIC_IPADDR:4001"
+FLANNEL_ETCD="http://x.x.x.x:4001"
 
 # etcd config key.  This is the configuration key that flannel queries
 # For address range assignment
@@ -241,7 +258,7 @@ systemctl status flanneld
 ip a
 ```
 
-* The docker and flannel network interfaces must match otherwise docker will fail to start. If Docker fails to load, or the flannel IP is not set correctly, reboot the system.  It is also possible to stop docker, delete the docker0 network interface, and then restart docker after flannel has started.  But rebooting is easier.
+* The docker and flannel network interfaces must match otherwise docker will fail to start. If Docker fails to load, or the flannel IP is not set correctly, reboot the system.  It is also possible to stop docker, delete the docker0 network interface, and then restart docker after flannel has started.  But rebooting is easier. Do not move forward until you can issue an _ip a_ and the _flannel_ and _docker0_ interface are on the same subnet.
 
 Now that master is configured, lets configure the other nodes called "minions" (minion{1,2}).
 
@@ -258,7 +275,7 @@ For some of the steps below, it might help to set up ssh keys on the master and 
 
 From the master:
 
-* Copy over flannel configuration to the minions, both of them. Use `scp` or copy the file contents manually.
+* Copy over flannel configuration to the minions, both of them. Use `scp` or copy the file contents manually. In the OS1 (OpenStack) environment, you can not scp files without moving some keys around.  It might just be quicker to copy and paste the contents.  In a KVM hosted environment, feel free to _scp_ files around.
 
 
 ```
@@ -326,6 +343,7 @@ inet 10.0.81.1/24 scope global docker0
 valid_lft forever preferred_lft forever
 ```
 
+Do not move forward until all three nodes have the docker and flannel interfaces on the same subnet.  
 
 At this point the flannel cluster is set up and we can test it. We have etcd running on the master node and flannel / Docker running on minion{1,2} minions. Next steps are for testing cross-host container communication which will confirm that Docker and flannel are configured properly.
 
@@ -382,6 +400,8 @@ PING 10.0.81.2 (10.0.81.2) 56(84) bytes of data.
 ```
 
 * You should have received a reply. That is it. flannel is set up on the two minions and you have cross host communication. Etcd is set up on the master node. Next step is to overlay the cluster with kubernetes.
+
+Do not move forward until you can ping from container to container on different hosts.
 
 
 ##Configure Kubernetes##
