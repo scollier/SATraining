@@ -44,8 +44,7 @@ systemctl status etcd
 
 **NOTE:** Choose an IP range that is *NOT* part of the public IP address range.
 
-```
-json
+```json
 {
     "Network": "18.0.0.0/16",
     "SubnetLen": 24,
@@ -65,8 +64,7 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlen
 
 Example of successful output:
 
-```
-json
+```json
 {"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n    \"Network\": \"18.0.0.0/16\",\n    \"SubnetLen\": 24,\n    \"Backend\": {\n        \"Type\": \"vxlan\",\n        \"VNI\": 1\n     }\n}\n","modifiedIndex":3,"createdIndex":3}}-bash-4.2# 
 ```
 
