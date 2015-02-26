@@ -426,7 +426,7 @@ for i in $(ls /etc/kubernetes/*); do cp $i{,.orig}; echo "Making a backup of $i"
 ```
 
 
-* Edit `/etc/kubernetes/config` to be the same on **all hosts**. For OpenStack VMs we will be using the *private IP address* of the master host.
+* Edit `/etc/kubernetes/config` to be the same on **all hosts**. For OpenStack VMs we will be using the *private IP address* of the master host.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.
 
 ```
 # logging to stderr means we get it in the systemd journal
@@ -444,7 +444,7 @@ KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 ####Configure the kubernetes services on the master
 
-* Edit `/etc/kubernetes/apiserver` to appear as such:
+* Edit `/etc/kubernetes/apiserver` to appear as such.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.
 
 ```       
 # Comma separated list of nodes in the etcd cluster
@@ -460,7 +460,7 @@ KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
 KUBE_API_ARGS=""
 ```
 
-* Edit `/etc/kubernetes/controller-manager` to appear as such.  Substitute your minion IPs here.:
+* Edit `/etc/kubernetes/controller-manager` to appear as such.  Substitute your minion IPs here in place of the MINION_PRIV_IP_{1,2} placeholder.
 
 ```
 # Comma separated list of minions
