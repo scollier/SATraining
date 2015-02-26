@@ -83,7 +83,7 @@ virt-install --import --name atomic-ga-3 --ram 4096 --vcpus 2 --disk path=/var/l
 
 ##**Update VMs**
 
-**NOTE:** *We will be working on **all three (3)** VMs. You will probably want to have three terminal windows open.*
+**NOTE:** We will be working on _all three (3)_ VMs. You will probably want to have three terminal windows open.
 
 * Confirm you can login to the hosts:
 
