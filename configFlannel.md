@@ -15,7 +15,7 @@ rpm -qi flannel
 rpm -qd docker
 rpm -qd etcd
 rpm -qd kubernetes
-rpm -qi flannel
+rpm -qd flannel
 rpm -qc docker
 rpm -qc etcd
 rpm -qc kubernetes
@@ -39,12 +39,13 @@ systemctl status etcd
 ```
 
 
-* Configure Flannel by creating a flannel-config.json in your current directory.  The contents should be:
+* Configure Flannel by creating a `flannel-config.json` in your current directory.  The contents should be:
 
 
 **NOTE:** Choose an IP range that is *NOT* part of the public IP address range.
 
 ```
+json
 {
     "Network": "18.0.0.0/16",
     "SubnetLen": 24,
@@ -53,7 +54,6 @@ systemctl status etcd
         "VNI": 1
      }
 }
-
 ```
 
 * Add the configuration to the etcd server. Use the public IP address of the master node. If this is an OpenStack VM you will need to look up the public IP address on the OpenStack Horizon dashboard.
@@ -66,6 +66,7 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlen
 Example of successful output:
 
 ```
+json
 {"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n    \"Network\": \"18.0.0.0/16\",\n    \"SubnetLen\": 24,\n    \"Backend\": {\n        \"Type\": \"vxlan\",\n        \"VNI\": 1\n     }\n}\n","modifiedIndex":3,"createdIndex":3}}-bash-4.2# 
 ```
 
