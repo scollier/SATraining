@@ -223,3 +223,5 @@ atomic run rhel7/rhel-tools man $@
 rhel-tools is an Super Privileged Container, which will be covered in the next presentation and lab.
 
 This concludes the deploying Atomic lab.
+
+## [NEXT LAB](spcContainers.md)
