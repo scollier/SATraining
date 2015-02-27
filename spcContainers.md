@@ -176,7 +176,7 @@ Vendor       : Red Hat, Inc.
 
 The rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic host. The tools container leverages the atomic command for installation, activation and management.
 
-* Install the rhel-tools container
+* Install the rhel-tools container.  You can do this on the master node.
 
 ```
 atomic install registry.access.stage.redhat.com/rhel7/rhel-tools
@@ -191,6 +191,18 @@ Run the rhel-tools container.  Notice how you are dropped to the prompt inside t
 atomic run registry.access.stage.redhat.com/rhel7/rhel-tools
 docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=rhel-tools -e IMAGE=registry.access.stage.redhat.com/rhel7/rhel-tools -v /run:/run -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host registry.access.stage.redhat.com/rhel7/rhel-tools
 [root@atomic-00 /]#
+```
+
+* Remember those commands at the end of the Atomic deployment lab?  The ones that didn not work.  Try them again.
+
+```
+man tcpdump
+
+git
+
+tcpdump
+
+sosreport
 ```
 
 * Explore the environment.  Check processes.

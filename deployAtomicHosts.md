@@ -169,7 +169,7 @@ ID: CNPB:PLKF:34V3:4ESX:Y3KG:XCUV:RYSQ:ZMHN:TFXF:2ENH:AR3V:MO5Q
 * Explore the environment.  What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
 
 ```
-man kubernetes
+man tcpdump
 
 git
 
