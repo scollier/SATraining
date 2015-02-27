@@ -85,9 +85,6 @@ Feb  9 16:31:36 localhost vagrant: test
 
 ####Scenario 2: Remote Logging
 
-#THIS MIGHT NOT WORK FOR SA TRAINING.  THE PROBLEM IS THAT WE NEED TO ADD A --net=host TO THE LABEL.  SKIP THIS SECTION FOR NOW.  2/23/2015 - scollier
-
-
 Stop the rsyslog container on the master node.  We are going to make a change to the `/etc/rsyslog.conf` file and we will need to re-read that.  Use following steps to stop the container. After the container is stopped you can change the file and restart the container.
 
 ```
@@ -133,18 +130,15 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 
 * Start the rsyslog server.
 
-
 ```
-atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+atomic run --name rsyslog registry.access.stage.redhat.com/rhel7/rsyslog
 ```
 
-
-* Test the configuration.
-
+###Test the configuration.
 
 * On the Atomic master host open a terminal, make sure rsyslog is started with atomic run, and issue command `logger remote test`
 
-* On the rsyslog server, check in the `/var/log/` directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a `syslog.log` file.  Watch that file.
+* On the rsyslog server(Node 1), check in the `/var/log/` directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a `syslog.log` file.  Watch that file and issue a few more _logger remote test_ commands.
 
 ```
 tail -f /var/log/192.168.121.228/syslog.log
@@ -162,7 +156,21 @@ Stop the container and remove the image
 atomic uninstall docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2
 ```
 
-# END SKIP SECTION 2/23/2015 - scollier
+### More on the Atomic command
+
+* What is the Docker run command being passed to Atomic?  Below, you can see that there are a couple of different labels.  These are part of the Dockerfile that was used to construct this image.  The RUN label shows all the paramenters that need to be passed to Docker in order to successfully run this rsyslog image.  As you can see, by embedding that into the container and calling it with the Atomic command, it is a lot easier on the user.  Basically, we are abstracting away that complex command.
+
+```
+# atomic info registry.access.stage.redhat.com/rhel7/rsyslog
+RUN          : docker run -d --privileged --name NAME --net=host -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -e IMAGE=IMAGE -e NAME=NAME --restart=always IMAGE /bin/rsyslog.sh
+Name         : rsyslog-docker
+Build_Host   : rcm-img04.build.eng.bos.redhat.com
+Version      : 7.1
+Architecture : x86_64
+INSTALL      : docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh
+Release      : 3
+Vendor       : Red Hat, Inc.
+```
 
 ###Using rhel-tools
 
