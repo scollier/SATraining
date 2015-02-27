@@ -193,7 +193,19 @@ From any node in the cluster, check the cluster members by issuing a query to et
 # cat /run/flannel/subnet.env
 ```
 
-* Check the network on the minion. Docker will fail to load if the docker and flannel network interfaces are not setup correctly. Reboot each minion. Again it is possible to fix this by hand, but rebooting is easier.  A functioning configuration should look like the following; notice the docker0 and flannel.1 interfaces.
+* Check the network on the minion.
+
+```
+# ip a
+```
+
+* Docker will fail to load if the docker and flannel network interfaces are not setup correctly. Again it is possible to fix this by hand, but rebooting is easier.
+
+```
+# systemctl reboot
+```
+
+* A functioning configuration should look like the following; notice the docker0 and flannel.1 interfaces.
 
 
 ```
