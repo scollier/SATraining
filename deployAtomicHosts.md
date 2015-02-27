@@ -2,7 +2,7 @@
     In order to make best use of the lab time please review the deployment options and ensure either 
 
 1. A working KVM environment or
-2. Access to the internal OpenStack OS1 environment.
+2. Access to an OpenStack environment.
 
 ##**Agenda / High Level Overview:**
 
@@ -17,10 +17,9 @@
 There are many ways to deploy an Atomic host.  In this lab, we provide guidance for OpenStack or local KVM.
 
 ##**Deployment Option 1: Atomic Hosts on OpenStack**
-You may use the the Red Hat internal, HSS-supported **OS1** OpenStack service.
+You may use an OpenStack service.
 
-1. PREREQUISITE: You must create an OS1 account and upload your SSH public key. Follow the ["Getting Started" instructions](https://mojo.redhat.com/docs/DOC-28082#jive_content_id_Getting_Started)
-1. Navigate to [Instances](https://control.os1.phx2.redhat.com/dashboard/project/instances/)
+1. Navigate to Instances
 1. Click "Launch Instances"
 1 Complete form
   1. Details tab
@@ -28,20 +27,20 @@ You may use the the Red Hat internal, HSS-supported **OS1** OpenStack service.
     * Flavor: *m1.medium*
     * Instance count: *3*
     * Instance Boot Source: *Boot from image*
-      * Image name: *rhel-atomic-cloud-7.1-6*
+      * Image name: *[atomic_image]*
   1. Access & Security tab
-    * select you keypair that was uploaded during OS1 account setup. See [instructions](https://mojo.redhat.com/docs/DOC-28082#jive_content_id_Getting_Started)
+    * select you keypair that was uploaded during OpenStack account setup.
     * Security Groups: *Default*
 1. Click "Launch"
 
 Three VMs will be created. Once Power State is *Running* you may SSH into the VMs. Your SSH public key will be used.
 
 * Note: Each instance requires a floating IP address in addition to the private OpenStack `172.x.x.x` address. Your OpenStack tenant may automatically assign a floating IP address. If not, you may need to assign it manually. If no floating IP addresses are available, create them.
-  1. Navigate to [Access & Security](https://control.os1.phx2.redhat.com/dashboard/project/access_and_security/)
+  1. Navigate to Access & Security
   1. Click "Floating IPs" tab
   1. Click "Allocate IPs to project"
   1. Assign floating IP addresses to each VM instance
-* SSH into the VMs with user `cloud-user` and the instance floating IP address. This address will be in the `10.3.xx.xx` range.
+* SSH into the VMs with user `cloud-user` and the instance floating IP address. This address will probably be in the `10.3.xx.xx` range.
 
 ```
 ssh cloud-user@10.3.xx.xxx
@@ -53,9 +52,9 @@ ssh cloud-user@10.3.xx.xxx
 * Grab and extract the Atomic and metadata images from our internal repo.  Use sudo and appropriate permissions.
 
 ```
-wget http://refarch.cloud.lab.eng.bos.redhat.com/pub/projects/atomic/atomic0-cidata.iso
+wget [metadata ISO image]
 cp atomic0-cidata.iso /var/lib/libvirt/images/.
-wget http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/images/20150217.0/cloud/rhel-atomic-host-7.qcow2.gz
+wget [atomic QCOW2 image]
 cp rhel-atomic-host-7.qcow2.gz /var/lib/libvirt/images/.; cd /var/lib/libvirt/images
 gunzip rhel-atomic-host-7.qcow2.gz
 ```
@@ -98,7 +97,7 @@ sudo -i
 
 ```
 atomic host status
-subscription-manager register --serverurl=subscription.rhn.stage.redhat.com --baseurl=cdn.stage.redhat.com --username=qa@redhat.com --password=******** --auto-attach
+subscription-manager register --serverurl=[stage] --baseurl=[stage] --username=[account_user] --password=[account_pass] --auto-attach
 atomic host upgrade
 ```
 This will subscribe the system to the stage environment and upgrade the system to the latest tree in the stage environment.
