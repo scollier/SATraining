@@ -259,7 +259,11 @@ kubectl create -f service.json
 * Check that the service is loaded on the master
 
 ```bash
-kubectl get services
+# kubectl get services
+NAME                LABELS                                    SELECTOR            IP                  PORT
+kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.254.207.162      80
+frontend            name=frontend                             name=apache         10.254.195.231      80
+kubernetes          component=apiserver,provider=kubernetes   <none>              10.254.8.30         443
 ```
 
 * Check out how it by looking at the following commands on any minion
