@@ -126,43 +126,6 @@ sudo -i
 atomic host status
 ```
 
-* Take note of the automatic storage configuration for Docker by looking at the logical volumes. An Atomic host comes optimized out of the box to take advantage of Device Mapper direct-lvm storage instead of straight device mapper.
-
-```
-# lvs
-  LV          VG       Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
-  docker-data atomicos -wi-ao---- 16.72g                                                    
-  docker-meta atomicos -wi-ao---- 32.00m                                                    
-  root        atomicos -wi-ao----  2.94g                                                    
-```
-
-* Now see how that cooresponds to the Docker data and meta storage.
-
-```
-# docker info
-Containers: 0
-Images: 0
-Storage Driver: devicemapper
- Pool Name: docker-253:0-12590043-pool
- Pool Blocksize: 65.54 kB
- Backing Filesystem: <unknown>
- Data file: /dev/atomicos/docker-data
- Metadata file: /dev/atomicos/docker-meta
- Data Space Used: 11.8 MB
- Data Space Total: 17.95 GB
- Metadata Space Used: 106.5 kB
- Metadata Space Total: 33.55 MB
- Udev Sync Supported: true
- Library Version: 1.02.93-RHEL7 (2015-01-28)
-Execution Driver: native-0.2
-Kernel Version: 3.10.0-229.el7.x86_64
-Operating System: Employee SKU
-CPUs: 2
-Total Memory: 3.86 GiB
-Name: scollier-atomic-ga-kube-test-acaea32f-667a-4a54-aea3-41d1ac573c1
-ID: CNPB:PLKF:34V3:4ESX:Y3KG:XCUV:RYSQ:ZMHN:TFXF:2ENH:AR3V:MO5Q
-```
-
 * Explore the environment.  What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
 
 ```
