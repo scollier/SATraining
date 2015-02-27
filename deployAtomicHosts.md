@@ -132,7 +132,7 @@ atomic host status
 * Take note of the automatic storage configuration for Docker by looking at the logical volumes.
 
 ```
-lvs
+# lvs
   LV          VG       Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
   docker-data atomicos -wi-ao---- 16.72g                                                    
   docker-meta atomicos -wi-ao---- 32.00m                                                    
