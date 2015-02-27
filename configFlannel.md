@@ -65,7 +65,7 @@ Perform the following on the master node (pick one):
 Example of successful output:
 
 ```json
-{"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n    \"Network\": \"18.0.0.0/16\",\n    \"SubnetLen\": 24,\n    \"Backend\": {\n        \"Type\": \"vxlan\",\n        \"VNI\": 1\n     }\n}\n","modifiedIndex":3,"createdIndex":3}}-bash-4.2# 
+{"action":"set","node":{"key":"/coreos.com/network/config","value":"{\n    \"Network\": \"18.0.0.0/16\",\n    \"SubnetLen\": 24,\n    \"Backend\": {\n        \"Type\": \"vxlan\",\n        \"VNI\": 1\n     }\n}\n","modifiedIndex":3,"createdIndex":3}}-bash-4.2#
 ```
 
 * Verify the key exists.  Use the IP Address of your etcd / master node.
@@ -89,7 +89,7 @@ Example of successful output:
 ```
 
 
-* Edit `/etc/sysconfig/flanneld` file with the public IP address of the master node. You must make a change here.
+* Edit `/etc/sysconfig/flanneld` file with the public IP address of the master node (If you are using OS1 use Private Address below for x.x.x.x). You must make a change here.
 
 
 ```
@@ -237,7 +237,7 @@ inet 18.0.81.1/24 scope global docker0
 valid_lft forever preferred_lft forever
 ```
 
-Do not move forward until all three nodes have the docker and flannel interfaces on the same subnet.  
+Do not move forward until all three nodes have the docker and flannel interfaces on the same subnet.
 
 At this point the flannel cluster is set up and we can test it. We have etcd running on the master node and flannel / Docker running on minion{1,2} minions. Next steps are for testing cross-host container communication which will confirm that Docker and flannel are configured properly.
 
