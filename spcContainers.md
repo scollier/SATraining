@@ -425,7 +425,7 @@ This example will be a bit more complicated.  We will introduce _systemd_ and mo
 Set up your directory structure.
 
 ```
-mkdir ~/root/usr/bin; mdkir /root/etc/systemd/system/httpd_template.service; cd /root/.
+mkdir /root/usr/bin; mdkir /root/etc/systemd/system/httpd_template.service; cd /root/.
 ```
 
 
