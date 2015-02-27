@@ -373,5 +373,9 @@ Change: 2015-02-25 01:40:07.042784999 +0000
 * Once inside the RHEL tools container, run sar and check the output.
 
 ```
-sar
+# sar
+Linux 3.10.0-229.el7.x86_64 (atomic-00.localdomain) 	02/27/2015 	_x86_64_	(2 CPU)
+
+08:22:03 PM       LINUX RESTART
+
 ```
