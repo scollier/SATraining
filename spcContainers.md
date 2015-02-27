@@ -389,7 +389,7 @@ Linux 3.10.0-229.el7.x86_64 (atomic-00.localdomain) 	02/27/2015 	_x86_64_	(2 CPU
 ###Building your own SPC - Example 1
 
 
-You can build your own SPC using the Dockerfile and the LABEL options.
+You can build your own SPC using the Dockerfile and the LABEL options. This lab can be done on the master host.
 
 Create a Dockerfile that looks like
 
@@ -419,6 +419,16 @@ atomic uninstall test
 ```
 
 ###Building your own SPC - Example 2
+
+This example will be a bit more complicated.  We will introduce _systemd_ and more complex _labels_. 
+
+Set up your directory structure.
+
+```
+mkdir ~/root/usr/bin; mdkir /root/etc/systemd/system/httpd_template.service; cd /root/.
+```
+
+
 
 We construct a Dockerfile that looks like:
 
