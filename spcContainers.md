@@ -503,3 +503,5 @@ The Atomic command will create a systemd unit file for each container as well
 as Log dir under /var/log/CONTAINERNAME, DATADIR under /var/lib/CONTAINERNAME
 and CONFDIR under /etc/CONTAINERNAME which can be used to configure your
 services.
+
+## [NEXT LAB](configFlannel.md)
