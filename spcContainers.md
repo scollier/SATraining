@@ -107,7 +107,7 @@ Receiving objects: 100% (48730/48730), 30.44 MiB | 9.63 MiB/s, done.
 Resolving deltas: 100% (32104/32104), done.
 ```
 
-Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the contianer, or type _exit_.
+Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the container, or type _exit_.
 
 ```
 # ls {/tmp,/var/tmp/}
@@ -300,7 +300,7 @@ Stop the container and remove the image
 
 ### More on the Atomic command
 
-* What is the Docker run command being passed to Atomic?  Below, you can see that there are a couple of different labels.  These are part of the Dockerfile that was used to construct this image.  The RUN label shows all the paramenters that need to be passed to Docker in order to successfully run this rsyslog image.  As you can see, by embedding that into the container and calling it with the Atomic command, it is a lot easier on the user.  Basically, we are abstracting away that complex command.
+* What is the Docker run command being passed to Atomic?  Below, you can see that there are a couple of different labels.  These are part of the Dockerfile that was used to construct this image.  The RUN label shows all the parameters that need to be passed to Docker in order to successfully run this rsyslog image.  As you can see, by embedding that into the container and calling it with the Atomic command, it is a lot easier on the user.  Basically, we are abstracting away that complex command.
 
 ```
 # atomic info rhel7/rsyslog
@@ -394,4 +394,117 @@ Linux 3.10.0-229.el7.x86_64 (atomic-00.localdomain) 	02/27/2015 	_x86_64_	(2 CPU
 
 08:22:03 PM       LINUX RESTART
 
+### Building your own SPC
+
+You can build your own SPC using the Dockerfile and the LABEL options.
+
+Create a Dockerfile that looks like
+
 ```
+FROM 		rhel7
+MAINTAINER	Your Name
+ENV container docker
+
+LABEL INSTALL="/bin/echo This is the install command"
+LABEL UNINSTALL="/bin/echo This is the uninstall command"
+LABEL RUN="/bin/echo This is the run command"
+```
+
+Now build the image
+
+```
+docker build -t test .
+```
+
+Now test your image
+
+```
+docker inspect test
+atomic install test
+atomic run test
+atomic uninstall test
+```
+
+So lets attempt a more comprehensive example
+
+We build a Dockerfile that looks like:
+
+```
+FROM 		rhel7
+MAINTAINER	Your Name
+ENV container docker
+RUN yum -y update; yum -y install httpd; yum clean all; systemctl enable httpd
+
+LABEL Version=1.0
+LABEL Vendor="Red Hat" License=GPLv3
+LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh"
+LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/uninstall.sh"
+ADD root /
+
+EXPOSE 80
+
+CMD [ "/sbin/init" ]
+```
+
+You also need to create a directory tree under root with three files
+
+#### cat root/usr/bin/install.sh 
+
+```
+#!/bin/sh
+# Make Data Dirs
+mkdir -p ${HOST}/${CONFDIR} ${HOST}/${LOGDIR}/httpd ${HOST}/${DATADIR}
+
+# Copy Config
+cp -pR /etc/httpd ${HOST}/${CONFDIR}
+
+# Create Container
+chroot ${HOST} /usr/bin/docker create -v /var/log/${NAME}/httpd:/var/log/httpd:Z -v /var/lib/${NAME}:/var/lib/httpd:Z --name ${NAME} ${IMAGE}
+
+# Install systemd unit file for running container
+sed -e "s/TEMPLATE/${NAME}/g" etc/systemd/system/httpd_template.service > ${HOST}/etc/systemd/system/httpd_${NAME}.service
+
+# Enabled systemd unit file
+chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.service
+```
+
+#### cat root/usr/bin/uninstall.sh
+```
+cat root/usr/bin/uninstall.sh 
+#!/bin/sh
+chroot ${HOST} /usr/bin/systemctl disable /etc/systemd/system/httpd_${NAME}.service
+rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
+```
+
+#### cat root/etc/systemd/system/httpd_template.service
+```
+[Unit]
+Description=The Apache HTTP Server for TEMPLATE
+After=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker start TEMPLATE
+ExecStop=/usr/bin/docker stop TEMPLATE
+ExecReload=/usr/bin/docker exec -t TEMPLATE /usr/sbin/httpd $OPTIONS -k graceful
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Now build the container
+
+```
+docker build -t httpd .
+```
+
+Now you can install multiple apache services with different names and different config data.
+
+```
+atomic install -n test1 httpd
+atomic install -n test2 httpd
+```
+
+The Atomic command will create a systemd unit file for each container as well
+as Log dir under /var/log/CONTAINERNAME, DATADIR under /var/lib/CONTAINERNAME
+and CONFDIR under /etc/CONTAINERNAME which can be used to configure your
+services.
