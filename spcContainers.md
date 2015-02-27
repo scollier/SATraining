@@ -386,7 +386,7 @@ Linux 3.10.0-229.el7.x86_64 (atomic-00.localdomain) 	02/27/2015 	_x86_64_	(2 CPU
 ```
 
 
-###Building your own SPC
+###Building your own SPC - Example 1
 
 
 You can build your own SPC using the Dockerfile and the LABEL options.
@@ -418,9 +418,9 @@ atomic run test
 atomic uninstall test
 ```
 
-So lets attempt a more comprehensive example
+###Building your own SPC - Example 2
 
-We build a Dockerfile that looks like:
+We construct a Dockerfile that looks like:
 
 ```
 FROM 		rhel7
