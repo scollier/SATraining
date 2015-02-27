@@ -22,8 +22,8 @@ There are many ways to deploy an Atomic host.  In this lab, we provide guidance 
 ##**Deployment Option 1: Atomic Hosts on OpenStack**
 You may use the the Red Hat internal, HSS-supported **OS1** OpenStack service.
 
-1. PREREQUISITE: You must create an OS1 account and upload your SSH public key. Follow the ["Getting Started" instructions](https://mojo.redhat.com/docs/DOC-28082#jive_content_id_Getting_Started)
-1. Navigate to [Instances](https://control.os1.phx2.redhat.com/dashboard/project/instances/)
+1. PREREQUISITE: You must create an OS1 account and upload your SSH public key.
+1. Navigate to [Instances](https://[OPENSTACK]/dashboard/project/instances/)
 1. Click "Launch Instances"
 1 Complete form
   1. Details tab
@@ -33,14 +33,14 @@ You may use the the Red Hat internal, HSS-supported **OS1** OpenStack service.
     * Instance Boot Source: *Boot from image*
       * Image name: *rhel-atomic-cloud-7.1-6*
   1. Access & Security tab
-    * select you keypair that was uploaded during OS1 account setup. See [instructions](https://mojo.redhat.com/docs/DOC-28082#jive_content_id_Getting_Started)
+    * select you keypair that was uploaded during OS1 account setup.
     * Security Groups: *Default*
 1. Click "Launch"
 
 Three VMs will be created. Once Power State is *Running* you may SSH into the VMs. Your SSH public key will be used.
 
 * Note: Each instance requires a floating IP address in addition to the private OpenStack `172.x.x.x` address. Your OpenStack tenant may automatically assign a floating IP address. If not, you may need to assign it manually. If no floating IP addresses are available, create them.
-  1. Navigate to [Access & Security](https://control.os1.phx2.redhat.com/dashboard/project/access_and_security/)
+  1. Navigate to Access & Security
   1. Click "Floating IPs" tab
   1. Click "Allocate IPs to project"
   1. Assign floating IP addresses to each VM instance
@@ -56,9 +56,9 @@ ssh cloud-user@10.3.xx.xxx
 * Grab and extract the Atomic and metadata images from our internal repo.  Use sudo and appropriate permissions.
 
 ```
-wget http://refarch.cloud.lab.eng.bos.redhat.com/pub/projects/atomic/atomic0-cidata.iso
+wget http://[LAB]/pub/projects/atomic/atomic0-cidata.iso
 cp atomic0-cidata.iso /var/lib/libvirt/images/.
-wget http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/images/20150217.0/cloud/rhel-atomic-host-7.qcow2.gz
+wget http://[DOWNLOAD]/images/20150217.0/cloud/rhel-atomic-host-7.qcow2.gz
 cp rhel-atomic-host-7.qcow2.gz /var/lib/libvirt/images/.; cd /var/lib/libvirt/images
 gunzip rhel-atomic-host-7.qcow2.gz
 ```
@@ -101,7 +101,7 @@ sudo -i
 
 ```
 atomic host status
-ostree remote add --set=gpg-verify=false GA.brew http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/repo/
+ostree remote add --set=gpg-verify=false GA.brew http://[DOWNLOAD]/repo/
 rpm-ostree rebase GA.brew:rhel-atomic-host/7/x86_64/standard
 ```
 This will fetch a new tree and display any RPM changes. **Note:** Customers will not have to add a remote. They will issue command `atomic host upgrade` then reboot.
@@ -663,8 +663,8 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 * Install the container.
 
 ```
-atomic install --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
-docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=docker-registry.usersys.redhat.com/atomcga/rsyslog -e NAME=rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog /bin/install.sh
+atomic install --name rsyslog [REGISTRY]/atomcga/rsyslog
+docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=[REGISTRY]/atomcga/rsyslog -e NAME=rsyslog [REGISTRY]/atomcga/rsyslog /bin/install.sh
 Installing file at /host//etc/rsyslog.conf in place of existing empty directory
 Installing file at /host//etc/rsyslog.conf
 Installing file at /host//etc/sysconfig/rsyslog
@@ -674,7 +674,7 @@ Installing file at /host//etc/sysconfig/rsyslog
 
 
 ```
-atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+atomic run --name rsyslog [REGISTRY]/atomcga/rsyslog
 
 ```
 
@@ -690,11 +690,11 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 * Run it         
 
 ```
-atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
-Pulling repository docker-registry.usersys.redhat.com/atomcga/rsyslog
+atomic run --name rsyslog [REGISTRY]/atomcga/rsyslog
+Pulling repository [REGISTRY]/atomcga/rsyslog
 72fff92e8533: Download complete 
-Status: Downloaded newer image for docker-registry.usersys.redhat.com/atomcga/rsyslog:latest
-docker run -d --privileged --name rsyslog -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -v /etc/hostname:/etc/hostname -e IMAGE=docker-registry.usersys.redhat.com/atomcga/rsyslog -e NAME=rsyslog --restart=always docker-registry.usersys.redhat.com/atomcga/rsyslog /bin/rsyslog.sh
+Status: Downloaded newer image for [REGISTRY]/atomcga/rsyslog:latest
+docker run -d --privileged --name rsyslog -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -v /etc/hostname:/etc/hostname -e IMAGE=[REGISTRY]/atomcga/rsyslog -e NAME=rsyslog --restart=always [REGISTRY]/atomcga/rsyslog /bin/rsyslog.sh
 c86ba2e7e205cadfff1facc4ebb820e849c8a8cc57c22caabffbbe7c7d3d9f8d
 ```
 
@@ -703,7 +703,7 @@ c86ba2e7e205cadfff1facc4ebb820e849c8a8cc57c22caabffbbe7c7d3d9f8d
 ```
 # docker ps
 CONTAINER ID        IMAGE                                                      COMMAND             CREATED             STATUS              PORTS               NAMES
-c86ba2e7e205        docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2   "/bin/rsyslog.sh"   2 minutes ago       Up 41 seconds                           rsyslog       
+c86ba2e7e205        [REGISTRY]/atomcga/rsyslog:7.1-2   "/bin/rsyslog.sh"   2 minutes ago       Up 41 seconds                           rsyslog       
 ```
 
 * How do I use it (scenario 1: single host smoke test)?  In one terminal on the master node, watch the logs.
@@ -747,7 +747,7 @@ On the master node, point it to the rsyslog server in the `/etc/rsyslog.conf`.  
 * Now switch to the rsyslog server (kubelet 1).  Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Install rsyslog on the kublet server.
 
 ```
-atomic install --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+atomic install --name rsyslog [REGISTRY]/atomcga/rsyslog
 ```
 
 
@@ -771,7 +771,7 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 
 
 ```
-atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+atomic run --name rsyslog [REGISTRY]/atomcga/rsyslog
 ```
 
 
@@ -795,7 +795,7 @@ Feb 10 09:40:07 localhost vagrant: remote test
 Stop the container and remove the image
 
 ```
-atomic uninstall docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2
+atomic uninstall [REGISTRY]/atomcga/rsyslog:7.1-2
 ```
 
 # END SKIP SECTION 2/23/2015 - scollier
@@ -805,17 +805,17 @@ atomic uninstall docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2
 * Install the rhel-tools container
 
 ```
-atomic install registry.access.stage.redhat.com/rhel7/rhel-tools
-Pulling repository registry.access.stage.redhat.com/rhel7/rhel-tools
+atomic install [REGISTRY]/rhel7/rhel-tools
+Pulling repository [REGISTRY]/rhel7/rhel-tools
 9a8ad4567c27: Download complete 
-Status: Downloaded newer image for registry.access.stage.redhat.com/rhel7/rhel-tools:latest
+Status: Downloaded newer image for [REGISTRY]/rhel7/rhel-tools:latest
 ```
 
 Run the rhel-tools container.  Notice how you are dropped to the prompt inside the container.
 
 ```
-atomic run registry.access.stage.redhat.com/rhel7/rhel-tools
-docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=rhel-tools -e IMAGE=registry.access.stage.redhat.com/rhel7/rhel-tools -v /run:/run -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host registry.access.stage.redhat.com/rhel7/rhel-tools
+atomic run [REGISTRY]/rhel7/rhel-tools
+docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=rhel-tools -e IMAGE=[REGISTRY]/rhel7/rhel-tools -v /run:/run -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host [REGISTRY]/rhel7/rhel-tools
 [root@atomic-00 /]#
 ```
 
@@ -893,11 +893,11 @@ The sadc container is our "system activity data collector", it is the daemon tha
 * Do this on these steps on the master node only.  Install the sadc container.
 
 ```
-# atomic install registry.access.stage.redhat.com/rhel7/sadc
-Pulling repository registry.access.stage.redhat.com/rhel7/sadc
+# atomic install [REGISTRY]/rhel7/sadc
+Pulling repository [REGISTRY]/rhel7/sadc
 1a97a9cc4d1b: Download complete 
-Status: Downloaded newer image for registry.access.stage.redhat.com/rhel7/sadc:latest
-docker run --rm --privileged --name sadc -v /:/host -e HOST=/host -e IMAGE=registry.access.stage.redhat.com/rhel7/sadc -e NAME=name registry.access.stage.redhat.com/rhel7/sadc /usr/local/bin/sysstat-install.sh
+Status: Downloaded newer image for [REGISTRY]/rhel7/sadc:latest
+docker run --rm --privileged --name sadc -v /:/host -e HOST=/host -e IMAGE=[REGISTRY]/rhel7/sadc -e NAME=name [REGISTRY]/rhel7/sadc /usr/local/bin/sysstat-install.sh
 Installing file at /host//etc/cron.d/sysstat
 Installing file at /host//etc/sysconfig/sysstat
 Installing file at /host//etc/sysconfig/sysstat.ioconf
@@ -928,13 +928,13 @@ Change: 2015-02-25 01:37:39.262403129 +0000
 * Run the container. Ensure the container is running.
 
 ```
-# atomic run registry.access.stage.redhat.com/rhel7/sadc
-docker run -d --privileged --name sadc -v /etc/sysconfig/sysstat:/etc/sysconfig/sysstat -v /etc/sysconfig/sysstat.ioconf:/etc/sysconfig/sysstat.ioconf -v /var/log/sa:/var/log/sa -v /:/host -e HOST=/host -e IMAGE=registry.access.stage.redhat.com/rhel7/sadc -e NAME=sadc --net=host --restart=always registry.access.stage.redhat.com/rhel7/sadc /usr/local/bin/sysstat.sh
+# atomic run [REGISTRY]/rhel7/sadc
+docker run -d --privileged --name sadc -v /etc/sysconfig/sysstat:/etc/sysconfig/sysstat -v /etc/sysconfig/sysstat.ioconf:/etc/sysconfig/sysstat.ioconf -v /var/log/sa:/var/log/sa -v /:/host -e HOST=/host -e IMAGE=[REGISTRY]/rhel7/sadc -e NAME=sadc --net=host --restart=always [REGISTRY]/rhel7/sadc /usr/local/bin/sysstat.sh
 79bf6243c05a9c1a07c7f987ac02b66264ff87ba84cc4714a24a48b3d526ebbc
 
 # docker ps -l
 CONTAINER ID        IMAGE                                               COMMAND                CREATED             STATUS              PORTS               NAMES
-79bf6243c05a        registry.access.stage.redhat.com/rhel7/sadc:7.1-3   "/usr/local/bin/syss"   33 seconds ago      Up 32 seconds                           sadc              
+79bf6243c05a        [REGISTRY]/rhel7/sadc:7.1-3   "/usr/local/bin/syss"   33 seconds ago      Up 32 seconds                           sadc              
 ```
 
 * Check the status of the files in /var/log/.
@@ -955,7 +955,7 @@ Change: 2015-02-25 01:40:07.042784999 +0000
 * Run the RHEL Tools container.
 
 ```
-atomic install registry.access.stage.redhat.com/rhel7/rhel-tools
+atomic install [REGISTRY]/rhel7/rhel-tools
 ```
 
 * Once inside the RHEL tools container, run sar and check the output.
