@@ -375,21 +375,3 @@ Change: 2015-02-25 01:40:07.042784999 +0000
 ```
 sar
 ```
-
-
-##**Troubleshooting**
-
-### Restarting services
-
-Restart services in this order:
-
-1. etcd
-1. flanneld
-1. docker
-
-### Networking
-
-Flannel configures an overlay network that docker uses. `ip a` must show docker and flannel on the same network.
-
-Flannel has file `/usr/lib/systemd/system/docker.service.d/flannel.conf` which sources `/run/flannel/docker`, generated from the `flannel-config.json` file. etcd stores the flannel configuration for the Master. Flannel runs on each node host (minion) to setup a unique class-C container network.
-
