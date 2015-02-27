@@ -338,7 +338,7 @@ This should have the exact same definition of the pod as above, only now it is b
 kubectl create -f rc.json
 ```
 
-Fell free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes publicIP balances between ALL of the replics!
+Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes publicIP balances between ALL of the replics!
 
 ```bash
 kubectl resize --replicas=3 replicationController apache-controller
