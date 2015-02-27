@@ -27,15 +27,15 @@ Perform the following on the master node (pick one):
 * Look at networking before flannel configuration.
 
 ```
-ip a
+# ip a
 ```
 
 * Start etcd.
 
 
 ```
-systemctl start etcd; systemctl enable etcd
-systemctl status etcd
+# systemctl start etcd; systemctl enable etcd
+# systemctl status etcd
 ```
 
 
@@ -59,7 +59,7 @@ systemctl status etcd
 
 
 ```
-curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlencode value@flannel-config.json
+# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlencode value@flannel-config.json
 ```
 
 Example of successful output:
@@ -72,20 +72,20 @@ Example of successful output:
 
 
 ```
-curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
+# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
 ```
 
 * Backup the flannel configuration file.
 
 
 ```
-cp /etc/sysconfig/flanneld{,.orig}
+# cp /etc/sysconfig/flanneld{,.orig}
 ```
 
 * Configure flannel using the network interface of the system. This is commonly `eth0` but might be `ens3`. Use `ip a` to list network interfaces. This should not be necessary on most systems unless they have multiple network interfaces.  In which case you will want to use the interface capable of talking to other nodes in the cluster.
 
 ```
-sed -i 's/#FLANNEL_OPTIONS=""/FLANNEL_OPTIONS="eth0"/g' /etc/sysconfig/flanneld
+# sed -i 's/#FLANNEL_OPTIONS=""/FLANNEL_OPTIONS="eth0"/g' /etc/sysconfig/flanneld
 ```
 
 
@@ -111,15 +111,15 @@ FLANNEL_OPTIONS="eth0"
 
 
 ```
-systemctl start flanneld; systemctl enable flanneld
-systemctl status flanneld
+# systemctl start flanneld; systemctl enable flanneld
+# systemctl status flanneld
 ```
 
 * Check the interfaces on the host now. Notice there is now a flannel.1 interface.
 
 
 ```
-ip a
+# ip a
 ```
 
 * The docker and flannel network interfaces must match otherwise docker will fail to start. If Docker fails to load, or the flannel IP is not set correctly, reboot the system.  It is also possible to stop docker, delete the docker0 network interface, and then restart docker after flannel has started.  But rebooting is easier. Do not move forward until you can issue an _ip a_ and the _flannel_ and _docker0_ interface are on the same subnet.
@@ -132,7 +132,7 @@ Now that master is configured, lets configure the other nodes called "minions" (
 
 
 ```
-curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
+# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
 ```
 
 For some of the steps below, it might help to set up ssh keys on the master and copy those over to the minions, e.g. with ssh-copy-id.  You also might want to set hostnames on the minions and edit your `/etc/hosts` files on all nodes to reflect that.
@@ -143,28 +143,28 @@ From the master:
 
 
 ```
-scp /etc/sysconfig/flanneld x.x.x.x:/etc/sysconfig/.
+# scp /etc/sysconfig/flanneld x.x.x.x:/etc/sysconfig/.
 ```
 
 
 * Restart flanneld on both of the minions.
 
 ```
-systemctl restart flanneld
-systemctl enable flanneld
+# systemctl restart flanneld
+# systemctl enable flanneld
 ```
 
 * Check the new interface on both of the minions.
 
 ```
-ip a l flannel.1
+# ip a l flannel.1
 ```
 
 From any node in the cluster, check the cluster members by issuing a query to etcd via curl.  You should see that three servers have consumed subnets.  You can associate those subnets to each server by the MAC address that is listed in the output.
 
 
 ```
-curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.tool
+# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.tool
 ```
 
 
@@ -172,14 +172,14 @@ curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.t
 
 
 ```
-cat /run/flannel/subnet.env
+# cat /run/flannel/subnet.env
 ```
 
 * Check the network on the minion. Docker will fail to load if the docker and flannel network interfaces are not setup correctly. Reboot each minion. Again it is possible to fix this by hand, but rebooting is easier.  A functioning configuration should look like the following; notice the docker0 and flannel.1 interfaces.
 
 
 ```
-ip a
+# ip a
 1: lo:  mtu 65536 qdisc noqueue state UNKNOWN group default
 link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
 inet 127.0.0.1/8 scope host lo
@@ -219,14 +219,14 @@ From each minion, pull a Docker image for testing. In our case, we will use fedo
 
 
 ```
-docker run -it fedora:20 bash
+# docker run -it fedora:20 bash
 ```
 
 * This will place you inside the container. Check the IP address.
 
 
 ```
-ip a l eth0
+# ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
 link/ether 02:42:0a:00:51:02 brd ff:ff:ff:ff:ff:ff
 inet 18.0.81.2/24 scope global eth0
@@ -242,9 +242,9 @@ You can see here that the IP address is on the flannel network.
 
 
 ```
-docker run -it fedora:20 bash
+# docker run -it fedora:20 bash
 
-ip a l eth0
+# ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
 link/ether 02:42:0a:00:45:02 brd ff:ff:ff:ff:ff:ff
 inet 18.0.69.2/24 scope global eth0
@@ -258,7 +258,7 @@ valid_lft forever preferred_lft forever
 
 
 ```
-ping 18.0.81.2
+# ping 18.0.81.2
 PING 18.0.81.2 (18.0.81.2) 56(84) bytes of data.
 64 bytes from 18.0.81.2: icmp_seq=2 ttl=62 time=2.93 ms
 64 bytes from 18.0.81.2: icmp_seq=3 ttl=62 time=0.376 ms
@@ -270,4 +270,23 @@ PING 18.0.81.2 (18.0.81.2) 56(84) bytes of data.
 Do not move forward until you can ping from container to container on different hosts.
 
 Exit the containers on each node when finished.
+
+
+
+##**Troubleshooting**
+
+### Restarting services
+
+Restart services in this order:
+
+1. etcd
+1. flanneld
+1. docker
+
+### Networking
+
+Flannel configures an overlay network that docker uses. `ip a` must show docker and flannel on the same network.
+
+Flannel has file `/usr/lib/systemd/system/docker.service.d/flannel.conf` which sources `/run/flannel/docker`, generated from the `flannel-config.json` file. etcd stores the flannel configuration for the Master. Flannel runs on each node host (minion) to setup a unique class-C container network.
+
 
