@@ -59,22 +59,20 @@ cp rhel-atomic-host-7.qcow2.gz /var/lib/libvirt/images/.; cd /var/lib/libvirt/im
 gunzip rhel-atomic-host-7.qcow2.gz
 ```
 
-* Make 3 copies of the image.
+* Make 3 copy-on-write images, using the downloaded image as a "gold" master.
 
 ```
-cp rhel-atomic-host-7.qcow2 rhel-atomic-host-7-1.qcow2
-cp rhel-atomic-host-7.qcow2 rhel-atomic-host-7-2.qcow2
-cp rhel-atomic-host-7.qcow2 rhel-atomic-host-7-3.qcow2
+for i in $(seq 3); do qemu-img create -f qcow2 -o backing_file=rhel-atomic-host-7.qcow2 rhel-atomic-host-7-${i}.qcow2 ; done
 ```
 
 * Use the following commands to install the images. Note: You will need to change the bridge to match your setup, or at least confirm it matches what you have.
 
 ```
-virt-install --import --name atomic-ga-1 --ram 4096 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-1.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
+virt-install --import --name atomic-ga-1 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-1.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
 
-virt-install --import --name atomic-ga-2 --ram 4096 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-2.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
+virt-install --import --name atomic-ga-2 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-2.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
 
-virt-install --import --name atomic-ga-3 --ram 4096 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-3.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
+virt-install --import --name atomic-ga-3 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-3.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
 ```
 
 ##**Update VMs**
