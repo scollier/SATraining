@@ -227,7 +227,9 @@ CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 
 ## Create a service to make the pod discoverable ##
 
-Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Create a service on the master by creating the following json service definition.  Be sure to include an IP for a minion in your cluster!
+Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Be sure to include an IP for a minion in your cluster!
+
+* Create a service on the master by creating a service.json file
 
 ```json
 {
@@ -248,6 +250,25 @@ Now that the pod is known to be running we need a way to find it.  Pods in kuber
 }
 ```
 
+* Load the json file into the kubenetes system
+
+```bash
+kubectl create -f service.json
+```
+
+* Check that the service is loaded on the master
+
+```bash
+kubectl get services
+```
+
+* Check out how it by looking at the following commands on any minion
+
+```bash
+iptables -nvL -t nat
+journalctl -b -l -u kube-proxy
+```
+
 * Finally, test that the container is actually working.
 
 ```
@@ -265,6 +286,7 @@ kubectl delete pod apache
 
 This should have the exact same definition of the pod as above, only now it is being controlled by a replication controller.  So if you delete the pod, or if the node disappears, the pod will be restarted elsewhere in the cluster!
 
+* Create an rc.json file to describe the replication controller
 
 ```json
 {
@@ -308,6 +330,12 @@ This should have the exact same definition of the pod as above, only now it is b
         "name": "apache"
     }
 }
+```
+
+* Load the json file on the master
+
+```bash
+kubectl create -f rc.json
 ```
 
 Fell free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes publicIP balances between ALL of the replics!
