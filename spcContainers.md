@@ -125,8 +125,11 @@ CONTAINER ID        IMAGE                                                  COMMA
 
 ```
 # cp /etc/rsyslog.conf{,.old}
+```
 
+Then append the `/etc/rsyslog.conf` file with these lines.
 
+```
 $ModLoad imklog # reads kernel messages (the same are read from journald)
 $ModLoad imudp
 $UDPServerRun 514
