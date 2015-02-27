@@ -98,10 +98,10 @@ sudo -i
 
 ```
 atomic host status
-ostree remote add --set=gpg-verify=false GA.brew http://download.eng.bos.redhat.com/rel-eng/Atomic/7/trees/GA.brew/repo/
-rpm-ostree rebase GA.brew:rhel-atomic-host/7/x86_64/standard
+subscription-manager register --serverurl=subscription.rhn.stage.redhat.com --baseurl=cdn.stage.redhat.com --username=qa@redhat.com --password=******** --auto-attach
+atomic host upgrade
 ```
-This will fetch a new tree and display any RPM changes. **Note:** Customers will not have to add a remote. They will issue command `atomic host upgrade` then reboot.
+This will subscribe the system to the stage environment and upgrade the system to the latest tree in the stage environment.
 
 * Check the atomic tree version
 
