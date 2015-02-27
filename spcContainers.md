@@ -1,6 +1,122 @@
 ## Use SPCs on the Atomic Hosts
 
-The goal here is to explore some of the images that we will be distributing when Atomic GAs.  We are trying to keep the Atomic image as small as possible where it makes sense.  This means that anything else that gets added to the Atomic host will have to be inside a container.  The examples we will go over in this section are rsyslog, sadc and rhel-tools.  For this to work you need at least two functioning Atomic hosts.
+The goal here is to explore some of the images that we will be distributing when Atomic GAs.  We are trying to keep the Atomic image as small as possible where it makes sense.  This means that anything else that gets added to the Atomic host will have to be inside a container.  The examples we will go over in this section are rhel-tools, rsyslog, and sadc.  For this to work you need at least two functioning Atomic hosts.
+
+###Using rhel-tools
+
+As we saw in the previous label, the rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic Host. The tools container leverages the atomic command for installation, activation and management.
+
+* Install the rhel-tools container.  You can do this on the master node.
+
+```
+# atomic install [REGISTRY]/rhel7/rhel-tools
+Pulling repository [REGISTRY]/rhel7/rhel-tools
+9a8ad4567c27: Download complete 
+Status: Downloaded newer image for [REGISTRY]/rhel7/rhel-tools:latest
+```
+
+Run the rhel-tools container.  Notice how you are dropped to the prompt inside the container.
+
+```
+# atomic run [REGISTRY]/rhel7/rhel-tools
+docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=rhel-tools -e IMAGE=[REGISTRY]/rhel7/rhel-tools -v /run:/run -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host [REGISTRY]/rhel7/rhel-tools
+[root@atomic-00 /]#
+```
+
+* Remember those commands at the end of the Atomic deployment lab?  The ones that did not work.  Try them again.
+
+```
+man tcpdump
+
+git
+
+tcpdump
+
+sosreport
+```
+
+* Explore the environment.  Check processes.
+
+```
+# ps aux
+USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root          1  0.0  0.1  61880  7720 ?        Ss   Feb20   0:03 /usr/lib/systemd/systemd --switched-root --system --deserialize 22
+root          2  0.0  0.0      0     0 ?        S    Feb20   0:00 [kthreadd]
+root          3  0.0  0.0      0     0 ?        S    Feb20   0:15 [ksoftirqd/0]
+root          5  0.0  0.0      0     0 ?        S<   Feb20   0:00 [kworker/0:0H]
+root          7  0.0  0.0      0     0 ?        S    Feb20   0:00 [migration/0]
+<snip>
+```
+
+* Check the envirionment variables.
+
+```
+# env
+HOSTNAME=atomic-00.localdomain
+HOST=/host
+TERM=xterm
+NAME=rhel-tools
+```
+
+* Run a sosreport.  Notice where it is saved to.  The sosreport tool has been modified to work in a container environment.
+
+```
+# sosreport 
+
+sosreport (version 3.2)
+
+This command will collect diagnostic and configuration information from
+this Red Hat Atomic Host system.
+
+<snip>
+
+Your sosreport has been generated and saved in:
+  /host/var/tmp/sosreport-scollier.12344321-20150225144723.tar.xz
+
+The checksum is: 9de2decce230cd4b2b84ab4f41ec926e
+
+Please send this file to your support representative.
+```
+
+Notice that the host os is mounted into /host within the container.
+
+```
+chroot /host
+```
+
+You are back in the host.
+
+```
+^d
+```
+
+You are back in the container.  You may also notice that /run is from the host
+and you see the hosts network and processes.  But you are still in a container.
+
+Lets play around a little more.
+
+* Clone a git repo, and save the repo to the host files system, not to the image filesystem.
+
+```
+# git clone https://github.com/GoogleCloudPlatform/kubernetes.git /host/tmp/kubernetes
+Cloning into '/host/tmp/kubernetes'...
+remote: Counting objects: 48730, done.
+remote: Compressing objects: 100% (22/22), done.
+remote: Total 48730 (delta 7), reused 0 (delta 0), pack-reused 48708
+Receiving objects: 100% (48730/48730), 30.44 MiB | 9.63 MiB/s, done.
+Resolving deltas: 100% (32104/32104), done.
+```
+
+Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the contianer, or type _exit_.
+
+```
+# ls {/tmp,/var/tmp/}
+/tmp:
+ks-script-K46kdd  ks-script-Si6KRr  kubernetes
+
+/var/tmp/:
+sosreport-scollier.12344321-20150225144723.tar.xz  sosreport-scollier.12344321-20150225144723.tar.xz.md5
+```
 
 ###Using rsyslog
 
@@ -181,106 +297,6 @@ Architecture : x86_64
 INSTALL      : docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh
 Release      : 3
 Vendor       : Red Hat, Inc.
-```
-
-###Using rhel-tools
-
-The rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic Host. The tools container leverages the atomic command for installation, activation and management.
-
-* Install the rhel-tools container.  You can do this on the master node.
-
-```
-# atomic install [REGISTRY]/rhel7/rhel-tools
-Pulling repository [REGISTRY]/rhel7/rhel-tools
-9a8ad4567c27: Download complete 
-Status: Downloaded newer image for [REGISTRY]/rhel7/rhel-tools:latest
-```
-
-Run the rhel-tools container.  Notice how you are dropped to the prompt inside the container.
-
-```
-# atomic run [REGISTRY]/rhel7/rhel-tools
-docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=rhel-tools -e IMAGE=[REGISTRY]/rhel7/rhel-tools -v /run:/run -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host [REGISTRY]/rhel7/rhel-tools
-[root@atomic-00 /]#
-```
-
-* Remember those commands at the end of the Atomic deployment lab?  The ones that did not work.  Try them again.
-
-```
-man tcpdump
-
-git
-
-tcpdump
-
-sosreport
-```
-
-* Explore the environment.  Check processes.
-
-```
-# ps aux
-USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-root          1  0.0  0.1  61880  7720 ?        Ss   Feb20   0:03 /usr/lib/systemd/systemd --switched-root --system --deserialize 22
-root          2  0.0  0.0      0     0 ?        S    Feb20   0:00 [kthreadd]
-root          3  0.0  0.0      0     0 ?        S    Feb20   0:15 [ksoftirqd/0]
-root          5  0.0  0.0      0     0 ?        S<   Feb20   0:00 [kworker/0:0H]
-root          7  0.0  0.0      0     0 ?        S    Feb20   0:00 [migration/0]
-<snip>
-```
-
-* Check the envirionment variables.
-
-```
-# env
-HOSTNAME=atomic-00.localdomain
-HOST=/host
-TERM=xterm
-NAME=rhel-tools
-```
-
-* Run a sosreport.  Notice where it is saved to.  The sosreport tool has been modified to work in a container environment.
-
-```
-# sosreport 
-
-sosreport (version 3.2)
-
-This command will collect diagnostic and configuration information from
-this Red Hat Atomic Host system.
-
-<snip>
-
-Your sosreport has been generated and saved in:
-  /host/var/tmp/sosreport-scollier.12344321-20150225144723.tar.xz
-
-The checksum is: 9de2decce230cd4b2b84ab4f41ec926e
-
-Please send this file to your support representative.
-```
-
-
-* Clone a git repo, and save the repo to the host files system, not to the image filesystem.
-
-```
-# git clone https://github.com/GoogleCloudPlatform/kubernetes.git /host/tmp/kubernetes
-Cloning into '/host/tmp/kubernetes'...
-remote: Counting objects: 48730, done.
-remote: Compressing objects: 100% (22/22), done.
-remote: Total 48730 (delta 7), reused 0 (delta 0), pack-reused 48708
-Receiving objects: 100% (48730/48730), 30.44 MiB | 9.63 MiB/s, done.
-Resolving deltas: 100% (32104/32104), done.
-```
-
-Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the contianer, or type _exit_.
-
-```
-# ls {/tmp,/var/tmp/}
-/tmp:
-ks-script-K46kdd  ks-script-Si6KRr  kubernetes
-
-/var/tmp/:
-sosreport-scollier.12344321-20150225144723.tar.xz  sosreport-scollier.12344321-20150225144723.tar.xz.md5
 ```
 
 ###Using sadc
