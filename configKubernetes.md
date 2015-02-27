@@ -360,7 +360,7 @@ apache-controller   my-fedora-apache    fedora/apache       name=apache         
 * The replication controller should have spawned a pod on a minion.  (This make take a short while, so STATUS may be Unknown at first)
 
 ```bash
-# kubectl get po
+# kubectl get pods
 POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
 52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-minion1/       name=apache         Running
 ```
@@ -375,7 +375,7 @@ resized
 CONTROLLER          CONTAINER(S)        IMAGE(S)            SELECTOR            REPLICAS
 apache-controller   my-fedora-apache    fedora/apache       name=apache         3
 
-# kubectl get po
+# kubectl get pods
 POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
 ac23ccfa-be99-11e4-91e5-52540052bd24   18.0.98.3           my-fedora-apache    fedora/apache       kube-minion2/       name=apache         Running
 52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-minion1/       name=apache         Running
