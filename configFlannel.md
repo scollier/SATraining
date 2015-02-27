@@ -107,22 +107,40 @@ FLANNEL_OPTIONS="eth0"
 ```
 
 
-* Start up the flanneld service.
+* Enable the flanneld service and reboot.
 
 
 ```
-# systemctl start flanneld; systemctl enable flanneld
-# systemctl status flanneld
-```
-
-* Check the interfaces on the host now. Notice there is now a flannel.1 interface.
-
-
-```
-# ip a
+# systemctl enable flanneld
+# systemctl reboot
 ```
 
 * The docker and flannel network interfaces must match otherwise docker will fail to start. If Docker fails to load, or the flannel IP is not set correctly, reboot the system.  It is also possible to stop docker, delete the docker0 network interface, and then restart docker after flannel has started.  But rebooting is easier. Do not move forward until you can issue an _ip a_ and the _flannel_ and _docker0_ interface are on the same subnet.
+
+* When the system comes back up check the interfaces on the host now. Notice there is now a flannel.1 interface.
+
+```
+# ip a
+...<snip>...
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+    link/ether fa:16:3e:32:ba:98 brd ff:ff:ff:ff:ff:ff
+    inet 172.16.36.47/24 brd 172.16.36.255 scope global dynamic eth0
+       valid_lft 182sec preferred_lft 182sec
+    inet6 fe80::f816:3eff:fe32:ba98/64 scope link 
+       valid_lft forever preferred_lft forever
+3: flannel.1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UNKNOWN 
+    link/ether c2:13:e3:a3:ae:3e brd ff:ff:ff:ff:ff:ff
+    inet 18.0.26.0/16 scope global flannel.1
+       valid_lft forever preferred_lft forever
+    inet6 fe80::c013:e3ff:fea3:ae3e/64 scope link 
+       valid_lft forever preferred_lft forever
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN 
+    link/ether 56:84:7a:fe:97:99 brd ff:ff:ff:ff:ff:ff
+    inet 18.0.26.1/24 scope global docker0
+       valid_lft forever preferred_lft forever
+
+```
+
 
 Now that master is configured, lets configure the other nodes called "minions" (minion{1,2}).
 
