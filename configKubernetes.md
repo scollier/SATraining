@@ -227,7 +227,7 @@ CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 
 ## Create a service to make the pod discoverable ##
 
-Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Be sure to include an IP for a minion in your cluster!
+Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Be sure to include an IP for a minion in your cluster!  This IP must be assigned to a minion and be visable on the minion via "ip addr"
 
 * Create a service on the master by creating a `service.json` file
 
@@ -280,6 +280,12 @@ journalctl -b -l -u kube-proxy
 ```
 curl http://MINION_PRIV_IP_1/
 Apache
+```
+
+* Now really test it.  If you are using OS1 you should be able to hit the web server by from you web browser by going to the PUBLIC IP associated with the minion(s) you chose in your service.
+
+```
+firefox http://MINION_PUBLIC_IP_1/
 ```
 
 * To delete the container.
