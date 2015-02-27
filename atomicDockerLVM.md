@@ -10,7 +10,7 @@
 3. Use bind mounts and notice that space goes to the host pool
 4. Host storage expansion
 
-#**Deployment**
+#**Inspect the system**
 
 * Take note of the automatic storage configuration for Docker by
   looking at the logical volumes. An Atomic Host comes optimized out
@@ -51,6 +51,7 @@ Name: scollier-atomic-ga-kube-test-acaea32f-667a-4a54-aea3-41d1ac573c1
 ID: CNPB:PLKF:34V3:4ESX:Y3KG:XCUV:RYSQ:ZMHN:TFXF:2ENH:AR3V:MO5Q
 ```
 
+#**Download images**
 * Pull a Docker image and notice that the data goes into the pool:
 
 ```
@@ -73,6 +74,7 @@ CONTAINER ID        IMAGE                                COMMAND                
   Data Space Used: 234.2 MB
 ```
 
+#**Use bind mounts**
 * Create host directory, label it, use a bind mount to write 50MB of data *outside* the container
 
 ```
