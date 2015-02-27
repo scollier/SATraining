@@ -195,7 +195,14 @@ You can also go into the rhel-tools container and explore its contents.
 atomic run rhel7/rhel-tools /bin/sh
 ```
 
-rhel-tools is an Super Privileged Container, which will be covered in the next presentation and lab.
+You might even want to create a shell script like the following:
 
+```
+cat /usr/local/bin/man
+#!/bin/sh
+atomic run rhel7/rhel-tools man $@
+```
+
+rhel-tools is an Super Privileged Container, which will be covered in the next presentation and lab.
 
 This concludes the deploying Atomic lab.
