@@ -88,6 +88,9 @@ Now, remove the stopped container and notice that the space is freed in Docker s
 # mkdir -p /var/local/containerdata
 # chcon -R -h -t svirt_sandbox_file_t /var/local/containerdata/
 # docker run --rm -v /var/local/containerdata:/var/tmp registry.access.redhat.com/rhel7 dd if=/dev/zero of=/var/tmp/data count=100000
+100000+0 records in
+100000+0 records out
+51200000 bytes (51 MB) copied, 0.0865377 s, 592 MB/s
 ```
 
 Notice that we used `--rm`, so the container is automatically deleted
@@ -95,12 +98,10 @@ after it runs.  However, the data exists on the host filesystem:
 
 ```
 # ls -al /var/local/containerdata
+total 50000
+drwxr-xr-x. 2 root root       17 Feb 27 20:40 .
+drwxr-xr-x. 3 root root       26 Feb 27 20:39 ..
+-rw-r--r--. 1 root root 51200000 Feb 27 20:40 data
 ```
 
 And the space in `df -h` on the host will have increased.
-
-#**More information**
-
-In-progress Atomic storage guide:
-
-http://jenkinscat.gsslab.pnq.redhat.com:8080/job/atomic-branch-yruseva-atomic-storage/lastSuccessfulBuild/artifact/pub_Atomic_Storage/index.html
