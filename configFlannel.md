@@ -319,4 +319,4 @@ Flannel configures an overlay network that docker uses. `ip a` must show docker 
 
 Flannel has file `/usr/lib/systemd/system/docker.service.d/flannel.conf` which sources `/run/flannel/docker`, generated from the `flannel-config.json` file. etcd stores the flannel configuration for the Master. Flannel runs on each node host (minion) to setup a unique class-C container network.
 
-
+## [NEXT LAB](configKubernetes.md)
