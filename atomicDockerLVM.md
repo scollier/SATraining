@@ -8,7 +8,7 @@
 1. Inspect and understand LVM setup
 2. Download images, write inside the container
 3. Use bind mounts and notice that space goes to the host pool
-4. Host storage expansion
+4. More documentation
 
 #**Inspect the system**
 
@@ -98,3 +98,9 @@ after it runs.  However, the data exists on the host filesystem:
 ```
 
 And the space in `df -h` on the host will have increased.
+
+#**More information**
+
+In-progress Atomic storage guide:
+
+http://jenkinscat.gsslab.pnq.redhat.com:8080/job/atomic-branch-yruseva-atomic-storage/lastSuccessfulBuild/artifact/pub_Atomic_Storage/index.html
