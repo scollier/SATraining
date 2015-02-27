@@ -441,9 +441,10 @@ CMD [ "/sbin/init" ]
 
 You also need to create a directory tree under root with three files
 
-#### cat root/usr/bin/install.sh 
 
 ```
+cat root/usr/bin/install.sh 
+
 #!/bin/sh
 # Make Data Dirs
 mkdir -p ${HOST}/${CONFDIR} ${HOST}/${LOGDIR}/httpd ${HOST}/${DATADIR}
@@ -461,16 +462,17 @@ sed -e "s/TEMPLATE/${NAME}/g" etc/systemd/system/httpd_template.service > ${HOST
 chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.service
 ```
 
-#### cat root/usr/bin/uninstall.sh
 ```
 cat root/usr/bin/uninstall.sh 
+
 #!/bin/sh
 chroot ${HOST} /usr/bin/systemctl disable /etc/systemd/system/httpd_${NAME}.service
 rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
 ```
 
-#### cat root/etc/systemd/system/httpd_template.service
 ```
+cat root/etc/systemd/system/httpd_template.service
+
 [Unit]
 Description=The Apache HTTP Server for TEMPLATE
 After=docker.service
