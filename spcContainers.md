@@ -60,9 +60,9 @@ atomic run --name rsyslog registry.access.stage.redhat.com/rhel7/rsyslog
 * Check the environment.  Now you should see a running rsyslog container.
 
 ```
-# docker ps
-CONTAINER ID        IMAGE                                                      COMMAND             CREATED             STATUS              PORTS               NAMES
-c86ba2e7e205        docker-registry.usersys.redhat.com/atomcga/rsyslog:7.1-2   "/bin/rsyslog.sh"   2 minutes ago       Up 41 seconds                           rsyslog       
+# docker ps -a
+CONTAINER ID        IMAGE                                                  COMMAND             CREATED             STATUS              PORTS               NAMES
+55ff84fcc332        registry.access.stage.redhat.com/rhel7/rsyslog:7.1-3   "/bin/rsyslog.sh"   2 minutes ago       Up 2 minutes                            rsyslog             
 ```
 
 * How do I use it (scenario 1: single host smoke test)?  In one terminal on the master node, watch the logs.
@@ -97,19 +97,24 @@ docker ps -a
 docker rm <container id>
 ```
 
-On the master node, point it to the rsyslog server in the `/etc/rsyslog.conf`.  Substitute your IP address here. The entry below is at the bottom of the file.
+On the master node, edit the `/etc/rsyslog.conf` file and point it to the rsyslog server.  This lab will use node1 as the rsyslog server.  Use the IP address of node1 here. The entry below is at the bottom of the file.
 
 ```
-*.* @@192.168.121.147:514
+*.* @@x.x.x.x:514
 ```
 
-* Now switch to the rsyslog server (kubelet 1).  Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Install rsyslog on the kublet server.
+* Start the rsyslog container on the master node.
 
 ```
-atomic install --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
+atomic run --name rsyslog registry.access.stage.redhat.com/rhel7/rsyslog
+docker ps -l
 ```
 
+* Now switch to the rsyslog server (node 1).  Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Install rsyslog on the kublet server.
 
+```
+atomic install registry.access.stage.redhat.com/rhel7/rsyslog
+```
 
 * Ensure the following entries are in the `/etc/rsyslog.conf`.  Then restart rsyslog. First backup the file.
 
