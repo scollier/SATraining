@@ -76,7 +76,7 @@ CONTAINER ID        IMAGE                                COMMAND                
 
 Now, remove the stopped container and notice that the space is freed in Docker storage:
 ```
-# docker rm prickly_stallman
+# docker rm <rhel7_container_id_or_name>
 # docker info |grep 'Data Space Used'
  Data Space Used: 200.3 MB
 ```
@@ -87,7 +87,7 @@ Now, remove the stopped container and notice that the space is freed in Docker s
 ```
 # mkdir -p /var/local/containerdata
 # chcon -R -h -t svirt_sandbox_file_t /var/local/containerdata/
-# docker run --rm registry.access.redhat.com/rhel7 -v /var/local/containerdata:/var/tmp dd if=/dev/zero of=/var/tmp/data count=100000
+# docker run --rm -v /var/local/containerdata:/var/tmp registry.access.redhat.com/rhel7 dd if=/dev/zero of=/var/tmp/data count=100000
 ```
 
 Notice that we used `--rm`, so the container is automatically deleted
