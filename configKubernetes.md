@@ -229,7 +229,9 @@ CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 
 Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Be sure to include an IP for a minion in your cluster!
 
-* Create a service on the master by creating a service.json file
+* Create a service on the master by creating a `service.json` file
+
+**NOTE:** You must use an actual IP address for the `publicIPs` value or the service will not run correctly on the minions
 
 ```json
 {
@@ -290,7 +292,7 @@ kubectl delete pod apache
 
 This should have the exact same definition of the pod as above, only now it is being controlled by a replication controller.  So if you delete the pod, or if the node disappears, the pod will be restarted elsewhere in the cluster!
 
-* Create an rc.json file to describe the replication controller
+* Create an `rc.json` file to describe the replication controller
 
 ```json
 {
@@ -336,18 +338,44 @@ This should have the exact same definition of the pod as above, only now it is b
 }
 ```
 
-* Load the json file on the master
+* Load the JSON file on the master
 
 ```bash
 kubectl create -f rc.json
 ```
-
-Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes publicIP balances between ALL of the replics!
+* Check that the replication controller has started
 
 ```bash
-kubectl resize --replicas=3 replicationController apache-controller
+# kubectl get rc
+CONTROLLER          CONTAINER(S)        IMAGE(S)            SELECTOR            REPLICAS
+apache-controller   my-fedora-apache    fedora/apache       name=apache         1
 ```
 
-I suggest you resize to 0 before you delete the replication controller.  Deleting a replicationController will leave the pods running.
+* The replication controller should have spawned a pod on a minion.  (This make take a short while, so STATUS may be Unknown at first)
+
+```bash
+# kubectl get po
+POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
+52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-minion1/       name=apache         Running
+```
+
+Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes `publicIP` balances between ALL of the replicas!
+
+```bash
+# kubectl resize --replicas=3 replicationController apache-controller
+resized
+
+# kubectl get rc
+CONTROLLER          CONTAINER(S)        IMAGE(S)            SELECTOR            REPLICAS
+apache-controller   my-fedora-apache    fedora/apache       name=apache         3
+
+# kubectl get po
+POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
+ac23ccfa-be99-11e4-91e5-52540052bd24   18.0.98.3           my-fedora-apache    fedora/apache       kube-minion2/       name=apache         Running
+52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-minion1/       name=apache         Running
+ac22a801-be99-11e4-91e5-52540052bd24   18.0.98.2           my-fedora-apache    fedora/apache       kube-minion2/       name=apache         Running
+```
+
+I suggest you resize to 0 before you delete the replication controller.  Deleting a `replicationController` will leave the pods running.
 
 Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the [guestbook example](https://github.com/GoogleCloudPlatform/kubernetes/tree/754a2a8305c812121c3845d8293efdd819b6a704/examples/guestbook-go). It is a bit more complicated but should expose you to more functionality.
