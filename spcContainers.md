@@ -2,6 +2,17 @@
 
 The goal here is to explore some of the images that we will be distributing when Atomic GAs.  We are trying to keep the Atomic image as small as possible where it makes sense.  This means that anything else that gets added to the Atomic host will have to be inside a container.  The examples we will go over in this section are rsyslog, sadc and rhel-tools.  For this to work you need at least two functioning Atomic hosts.
 
+```
+less /var/log/messages
+```
+Notice on a RHEL Atomic host there is no syslog by default.  You can look at the log messages using journald.
+
+```
+journalctl 
+```
+
+If you want to use rsyslog on your host, you need to install the rsyslog SPC container.
+
 ###Using rsyslog
 
 The rsyslog container runs in the background for the purposes of managing logs. We will cover two scenarios:
