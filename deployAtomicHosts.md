@@ -129,7 +129,7 @@ sudo -i
 atomic host status
 ```
 
-* Take note of the automatic storage configuration for Docker by looking at the logical volumes.
+* Take note of the automatic storage configuration for Docker by looking at the logical volumes. An Atomic host comes optimized out of the box to take advantage of Device Mapper direct-lvm storage instead of straight device mapper.
 
 ```
 # lvs
