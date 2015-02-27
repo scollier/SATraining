@@ -137,36 +137,35 @@ NAME                LABELS              STATUS
 
 ```json
 {
-        "apiVersion": "v1beta1",
-        "kind": "Pod",
-        "id": "apache",
-        "namespace": "default",
-        "labels": {
-          "name": "apache"
-        },
-        "desiredState": {
-          "manifest": {
-          "version": "v1beta1",
-          "id": "apache",
-          "volumes": null,
-          "containers": [
-            {
-              "name": "master",
-              "image": "fedora/apache",
-              "ports": [
-            {
-              "containerPort": 80,
-              "hostPort": 80,
-              "protocol": "TCP"
-            }
-          ],
+    "apiVersion": "v1beta1",
+    "desiredState": {
+        "manifest": {
+            "containers": [
+                {
+                    "image": "fedora/apache",
+                    "name": "my-fedora-apache",
+                    "ports": [
+                        {
+                            "containerPort": 80,
+                            "protocol": "TCP"
+                        }
+                    ]
+                }
+            ],
+            "id": "apache",
+            "restartPolicy": {
+                "always": {}
+            },
+            "version": "v1beta1",
+            "volumes": null
         }
-      ],
-      "restartPolicy": {
-      "always": {}
-      }
     },
-  },
+    "id": "apache",
+    "kind": "Pod",
+    "labels": {
+        "name": "apache"
+    },
+    "namespace": "default"
 }
 ```
 
@@ -185,7 +184,7 @@ kubectl create -f apache.json
 On the master (master) -
 
 ```
-journalctl -f -l -xn -u kube-apiserver -u etcd -u kube-scheduler
+journalctl -f -l -xn -u kube-apiserver -u kube-scheduler
 ```
 
 * On the minion (minion) -
@@ -200,7 +199,7 @@ journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
 ```
 # kubectl get pods
 POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-apache              18.0.53.3           master              fedora/apache       192.168.121.147/    name=apache         Running
+apache              18.0.53.3           my-fedora-apache    fedora/apache       192.168.121.147/    name=apache         Running
 mysql               18.0.73.2           mysql               mysql               192.168.121.101/    name=mysql          Running
 redis-master        18.0.53.2           master              dockerfile/redis    192.168.121.147/    name=redis-master   Running
 ```
@@ -213,7 +212,7 @@ The state might be 'Pending'. This indicates that docker is still attempting to 
 kubectl get pods --output=json apache
 ```
 
-* Finally, on the minion (minion), check that the service is available, running, and functioning.
+* Finally, on the minion (minion), check that the pod is available and running.
 
 ```
 docker images
@@ -224,8 +223,35 @@ fedora/apache latest 6927a389deb6 3 months ago 450.6 MB
 docker ps -l
 CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 05c69c00ea48 fedora/apache:latest "/run-apache.sh" 2 minutes ago Up 2 minutes k8s--master.3f918229--apache.etcd--8cd6efe6_-_3a95_-_11e4_-_b618_-_5254005318cb--9bb78458
+```
 
-curl http://localhost
+## Create a service to make the pod discoverable ##
+
+Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Create a service on the master by creating the following json service definition.  Be sure to include an IP for a minion in your cluster!
+
+```json
+{
+    "apiVersion": "v1beta1",
+    "containerPort": 80,
+    "id": "frontend",
+    "kind": "Service",
+    "labels": {
+        "name": "frontend"
+    },
+    "port": 80,
+    "publicIPs": [
+        "MINION_PRIV_IP_1"
+    ],
+    "selector": {
+        "name": "apache"
+    }
+}
+```
+
+* Finally, test that the container is actually working.
+
+```
+curl http://MINION_PRIV_IP_1/
 Apache
 ```
 
@@ -234,5 +260,62 @@ Apache
 ```
 kubectl delete pod apache
 ```
+
+## Create a replication controller to control the pod ##
+
+This should have the exact same definition of the pod as above, only now it is being controlled by a replication controller.  So if you delete the pod, or if the node disappears, the pod will be restarted elsewhere in the cluster!
+
+
+```json
+{
+    "apiVersion": "v1beta1",
+    "desiredState": {
+        "podTemplate": {
+            "desiredState": {
+                "manifest": {
+                    "containers": [
+                        {
+                            "image": "fedora/apache",
+                            "name": "my-fedora-apache",
+                            "ports": [
+                                {
+                                    "containerPort": 80,
+                                    "protocol": "TCP"
+                                }
+                            ]
+                        }
+                    ],
+                    "id": "apache",
+                    "restartPolicy": {
+                        "always": {}
+                    },
+                    "version": "v1beta1",
+                    "volumes": null
+                }
+            },
+            "labels": {
+                "name": "apache"
+            }
+        },
+        "replicaSelector": {
+            "name": "apache"
+        },
+        "replicas": 1
+    },
+    "id": "apache-controller",
+    "kind": "ReplicationController",
+    "labels": {
+        "name": "apache"
+    }
+}
+```
+
+Fell free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes publicIP balances between ALL of the replics!
+
+```bash
+kubectl resize --replicas=3 replicationController apache-controller
+```
+
+I suggest you resize to 0 before you delete the replication controller.  Deleting a replicationController will leave the pods running.
 
 Of course this just scratches the surface. I recommend you head off to the kubernetes github page and follow the [guestbook example](https://github.com/GoogleCloudPlatform/kubernetes/tree/754a2a8305c812121c3845d8293efdd819b6a704/examples/guestbook-go). It is a bit more complicated but should expose you to more functionality.
