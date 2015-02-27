@@ -172,4 +172,30 @@ sosreport
 ```
 Why wouldn't we include these commands in the Atomic image?
 
+# If you want to add something to Atomic Host, you must build a container
+
+Lets try
+
+```
+atomic install rhel7/rhel-tools
+```
+
+This will install the rhel-tools container, which can be used as the Adminstrators shell.
+
+Now lets try
+
+```
+atomic run rhel7/rhel-tools man tcpdump
+atomic run rhel7/rhel-tools tcpdump
+```
+
+You can also go into the rhel-tools container and explore its contents.
+
+```
+atomic run rhel7/rhel-tools /bin/sh
+```
+
+rhel-tools is an Super Privileged Container, which will be covered in the next presentation and lab.
+
+
 This concludes the deploying Atomic lab.
