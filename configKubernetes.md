@@ -282,7 +282,7 @@ curl http://MINION_PRIV_IP_1/
 Apache
 ```
 
-* Now really test it.  If you are using OS1 you should be able to hit the web server by from you web browser by going to the PUBLIC IP associated with the minion(s) you chose in your service.
+* Now really test it.  If you are using OS1 you should be able to hit the web server from you web browser by going to the PUBLIC IP associated with the minion(s) you chose in your service.
 
 ```
 firefox http://MINION_PUBLIC_IP_1/
