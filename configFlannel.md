@@ -211,6 +211,8 @@ Do not move forward until all three nodes have the docker and flannel interfaces
 
 At this point the flannel cluster is set up and we can test it. We have etcd running on the master node and flannel / Docker running on minion{1,2} minions. Next steps are for testing cross-host container communication which will confirm that Docker and flannel are configured properly.
 
+##Test the flannel configuration
+
 From each minion, pull a Docker image for testing. In our case, we will use fedora:20.
 
 * Issue the following on minion1.
