@@ -107,7 +107,7 @@ Receiving objects: 100% (48730/48730), 30.44 MiB | 9.63 MiB/s, done.
 Resolving deltas: 100% (32104/32104), done.
 ```
 
-Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the contianer, or type _exit_.
+Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the container, or type _exit_.
 
 ```
 # ls {/tmp,/var/tmp/}
@@ -300,7 +300,7 @@ Stop the container and remove the image
 
 ### More on the Atomic command
 
-* What is the Docker run command being passed to Atomic?  Below, you can see that there are a couple of different labels.  These are part of the Dockerfile that was used to construct this image.  The RUN label shows all the paramenters that need to be passed to Docker in order to successfully run this rsyslog image.  As you can see, by embedding that into the container and calling it with the Atomic command, it is a lot easier on the user.  Basically, we are abstracting away that complex command.
+* What is the Docker run command being passed to Atomic?  Below, you can see that there are a couple of different labels.  These are part of the Dockerfile that was used to construct this image.  The RUN label shows all the parameters that need to be passed to Docker in order to successfully run this rsyslog image.  As you can see, by embedding that into the container and calling it with the Atomic command, it is a lot easier on the user.  Basically, we are abstracting away that complex command.
 
 ```
 # atomic info rhel7/rsyslog
@@ -312,6 +312,106 @@ Architecture : x86_64
 INSTALL      : docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh
 Release      : 3
 Vendor       : Red Hat, Inc.
+```
+
+###Using rhel-tools
+
+The rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic Host. The tools container leverages the atomic command for installation, activation and management.
+
+* Install the rhel-tools container.  You can do this on the master node.
+
+```
+# atomic install [REGISTRY]/rhel7/rhel-tools
+Pulling repository [REGISTRY]/rhel7/rhel-tools
+9a8ad4567c27: Download complete 
+Status: Downloaded newer image for [REGISTRY]/rhel7/rhel-tools:latest
+```
+
+Run the rhel-tools container.  Notice how you are dropped to the prompt inside the container.
+
+```
+# atomic run [REGISTRY]/rhel7/rhel-tools
+docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=rhel-tools -e IMAGE=[REGISTRY]/rhel7/rhel-tools -v /run:/run -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host [REGISTRY]/rhel7/rhel-tools
+[root@atomic-00 /]#
+```
+
+* Remember those commands at the end of the Atomic deployment lab?  The ones that did not work.  Try them again.
+
+```
+man tcpdump
+
+git
+
+tcpdump
+
+sosreport
+```
+
+* Explore the environment.  Check processes.
+
+```
+# ps aux
+USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root          1  0.0  0.1  61880  7720 ?        Ss   Feb20   0:03 /usr/lib/systemd/systemd --switched-root --system --deserialize 22
+root          2  0.0  0.0      0     0 ?        S    Feb20   0:00 [kthreadd]
+root          3  0.0  0.0      0     0 ?        S    Feb20   0:15 [ksoftirqd/0]
+root          5  0.0  0.0      0     0 ?        S<   Feb20   0:00 [kworker/0:0H]
+root          7  0.0  0.0      0     0 ?        S    Feb20   0:00 [migration/0]
+<snip>
+```
+
+* Check the envirionment variables.
+
+```
+# env
+HOSTNAME=atomic-00.localdomain
+HOST=/host
+TERM=xterm
+NAME=rhel-tools
+```
+
+* Run a sosreport.  Notice where it is saved to.  The sosreport tool has been modified to work in a container environment.
+
+```
+# sosreport 
+
+sosreport (version 3.2)
+
+This command will collect diagnostic and configuration information from
+this Red Hat Atomic Host system.
+
+<snip>
+
+Your sosreport has been generated and saved in:
+  /host/var/tmp/sosreport-scollier.12344321-20150225144723.tar.xz
+
+The checksum is: 9de2decce230cd4b2b84ab4f41ec926e
+
+Please send this file to your support representative.
+```
+
+
+* Clone a git repo, and save the repo to the host files system, not to the image filesystem.
+
+```
+# git clone https://github.com/GoogleCloudPlatform/kubernetes.git /host/tmp/kubernetes
+Cloning into '/host/tmp/kubernetes'...
+remote: Counting objects: 48730, done.
+remote: Compressing objects: 100% (22/22), done.
+remote: Total 48730 (delta 7), reused 0 (delta 0), pack-reused 48708
+Receiving objects: 100% (48730/48730), 30.44 MiB | 9.63 MiB/s, done.
+Resolving deltas: 100% (32104/32104), done.
+```
+
+Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the contianer, or type _exit_.
+
+```
+# ls {/tmp,/var/tmp/}
+/tmp:
+ks-script-K46kdd  ks-script-Si6KRr  kubernetes
+
+/var/tmp/:
+sosreport-scollier.12344321-20150225144723.tar.xz  sosreport-scollier.12344321-20150225144723.tar.xz.md5
 ```
 
 ###Using sadc
@@ -394,4 +494,117 @@ Linux 3.10.0-229.el7.x86_64 (atomic-00.localdomain) 	02/27/2015 	_x86_64_	(2 CPU
 
 08:22:03 PM       LINUX RESTART
 
+### Building your own SPC
+
+You can build your own SPC using the Dockerfile and the LABEL options.
+
+Create a Dockerfile that looks like
+
 ```
+FROM 		rhel7
+MAINTAINER	Your Name
+ENV container docker
+
+LABEL INSTALL="/bin/echo This is the install command"
+LABEL UNINSTALL="/bin/echo This is the uninstall command"
+LABEL RUN="/bin/echo This is the run command"
+```
+
+Now build the image
+
+```
+docker build -t test .
+```
+
+Now test your image
+
+```
+docker inspect test
+atomic install test
+atomic run test
+atomic uninstall test
+```
+
+So lets attempt a more comprehensive example
+
+We build a Dockerfile that looks like:
+
+```
+FROM 		rhel7
+MAINTAINER	Your Name
+ENV container docker
+RUN yum -y update; yum -y install httpd; yum clean all; systemctl enable httpd
+
+LABEL Version=1.0
+LABEL Vendor="Red Hat" License=GPLv3
+LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh"
+LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/uninstall.sh"
+ADD root /
+
+EXPOSE 80
+
+CMD [ "/sbin/init" ]
+```
+
+You also need to create a directory tree under root with three files
+
+#### cat root/usr/bin/install.sh 
+
+```
+#!/bin/sh
+# Make Data Dirs
+mkdir -p ${HOST}/${CONFDIR} ${HOST}/${LOGDIR}/httpd ${HOST}/${DATADIR}
+
+# Copy Config
+cp -pR /etc/httpd ${HOST}/${CONFDIR}
+
+# Create Container
+chroot ${HOST} /usr/bin/docker create -v /var/log/${NAME}/httpd:/var/log/httpd:Z -v /var/lib/${NAME}:/var/lib/httpd:Z --name ${NAME} ${IMAGE}
+
+# Install systemd unit file for running container
+sed -e "s/TEMPLATE/${NAME}/g" etc/systemd/system/httpd_template.service > ${HOST}/etc/systemd/system/httpd_${NAME}.service
+
+# Enabled systemd unit file
+chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.service
+```
+
+#### cat root/usr/bin/uninstall.sh
+```
+cat root/usr/bin/uninstall.sh 
+#!/bin/sh
+chroot ${HOST} /usr/bin/systemctl disable /etc/systemd/system/httpd_${NAME}.service
+rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
+```
+
+#### cat root/etc/systemd/system/httpd_template.service
+```
+[Unit]
+Description=The Apache HTTP Server for TEMPLATE
+After=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker start TEMPLATE
+ExecStop=/usr/bin/docker stop TEMPLATE
+ExecReload=/usr/bin/docker exec -t TEMPLATE /usr/sbin/httpd $OPTIONS -k graceful
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Now build the container
+
+```
+docker build -t httpd .
+```
+
+Now you can install multiple apache services with different names and different config data.
+
+```
+atomic install -n test1 httpd
+atomic install -n test2 httpd
+```
+
+The Atomic command will create a systemd unit file for each container as well
+as Log dir under /var/log/CONTAINERNAME, DATADIR under /var/lib/CONTAINERNAME
+and CONFDIR under /etc/CONTAINERNAME which can be used to configure your
+services.
