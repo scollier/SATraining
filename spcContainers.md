@@ -14,17 +14,17 @@ The rsyslog container runs in the background for the purposes of managing logs. 
 * Check the environment before.  You may have a couple of residual images.  You should not have any rsyslog images. You can perform this on the master node.
 
 ```
-docker images
+# docker images
 REPOSITORY                                               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
 
-docker ps -a
+# docker ps -a
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
 
 * Install the container.
 
 ```
-atomic install [REGISTRY]/rhel7/rsyslog
+# atomic install [REGISTRY]/rhel7/rsyslog
 Pulling repository [REGISTRY]/rhel7/rsyslog
 b5168acccb4c: Download complete 
 Status: Downloaded newer image for [REGISTRY]/rhel7/rsyslog:latest
@@ -43,18 +43,21 @@ INSECURE_REGISTRY='--insecure-registry [REGISTRY]'
 * Check the environment after the install.  You should now see the rsyslog image, but no container yet.
 
 ```
-docker images
+# docker images
+REPOSITORY                                       TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+[REGISTRY]/rhel7/rsyslog                         7.1-3               b5168acccb4c        2 weeks ago         183.7 MB
+[REGISTRY]/rhel7/rsyslog                         latest              b5168acccb4c        2 weeks ago         183.7 MB
 
-docker ps -a
+# docker ps -a
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
 
 * Run the container.
 
-
 ```
-atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
-
+# atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
+docker run -d --privileged --name rsyslog --net=host -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -e IMAGE=[REGISTRY]/rhel7/rsyslog -e NAME=rsyslog --restart=always [REGISTRY]/rhel7/rsyslog /bin/rsyslog.sh
+21f8ce9ce852157f048614d9ee8d2c111079ce793f6b4ad80972a50f293977bf
 ```
 
 * Check the environment.  Now you should see a running rsyslog container.
@@ -103,20 +106,25 @@ On the master node, edit the `/etc/rsyslog.conf` file and point it to the rsyslo
 * Start the rsyslog container on the master node.
 
 ```
-atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
-docker ps -l
+# atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
+docker run -d --privileged --name rsyslog --net=host -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -e IMAGE=rhel7/rsyslog -e NAME=rsyslog --restart=always rhel7/rsyslog /bin/rsyslog.sh
+869edb432c7d172dac0317ac24a3763aa19321461415aaab74e3ac48c58e5bb5
+
+# docker ps -l
+CONTAINER ID        IMAGE                                                  COMMAND             CREATED             STATUS              PORTS               NAMES
+869edb432c7d        [REGISTRY]/rhel7/rsyslog:7.1-3                         "/bin/rsyslog.sh"   30 seconds ago      Up 29 seconds                           rsyslog
 ```
 
 * Now switch to the rsyslog server (node 1).  Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Install rsyslog on the kublet server.
 
 ```
-atomic install [REGISTRY]/rhel7/rsyslog
+# atomic install [REGISTRY]/rhel7/rsyslog
 ```
 
 * Ensure the following entries are in the `/etc/rsyslog.conf`.  Then restart rsyslog. First backup the file.
 
 ```
-cp /etc/rsyslog.conf{,.old}
+# cp /etc/rsyslog.conf{,.old}
 
 
 $ModLoad imklog # reads kernel messages (the same are read from journald)
@@ -131,17 +139,17 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 * Start the rsyslog server.
 
 ```
-atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
+# atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
 ```
 
 ###Test the configuration.
 
-* On the Atomic master host open a terminal, make sure rsyslog is started with atomic run, and issue command `logger remote test`
+* On the Atomic master host open a terminal, make sure rsyslog is started with `atomic` run, and issue command `logger remote test`
 
 * On the rsyslog server(Node 1), check in the `/var/log/` directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a `syslog.log` file.  Watch that file and issue a few more _logger remote test_ commands.
 
 ```
-tail -f /var/log/192.168.121.228/syslog.log
+# tail -f /var/log/192.168.121.228/syslog.log
 Feb 10 09:40:01 localhost CROND[6210]: (root) CMD (/usr/lib64/sa/sa1 1 1)
 Feb 10 09:40:03 localhost vagrant: remote test
 Feb 10 09:40:05 localhost vagrant: remote test
@@ -153,7 +161,7 @@ Feb 10 09:40:07 localhost vagrant: remote test
 Stop the container and remove the image
 
 ```
-atomic uninstall [REGISTRY]/rhel7/rsyslog:7.1-2
+# atomic uninstall [REGISTRY]/rhel7/rsyslog:7.1-3
 ```
 
 ### More on the Atomic command
@@ -174,12 +182,12 @@ Vendor       : Red Hat, Inc.
 
 ###Using rhel-tools
 
-The rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic host. The tools container leverages the atomic command for installation, activation and management.
+The rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic Host. The tools container leverages the atomic command for installation, activation and management.
 
 * Install the rhel-tools container.  You can do this on the master node.
 
 ```
-atomic install [REGISTRY]/rhel7/rhel-tools
+# atomic install [REGISTRY]/rhel7/rhel-tools
 Pulling repository [REGISTRY]/rhel7/rhel-tools
 9a8ad4567c27: Download complete 
 Status: Downloaded newer image for [REGISTRY]/rhel7/rhel-tools:latest
@@ -188,12 +196,12 @@ Status: Downloaded newer image for [REGISTRY]/rhel7/rhel-tools:latest
 Run the rhel-tools container.  Notice how you are dropped to the prompt inside the container.
 
 ```
-atomic run [REGISTRY]/rhel7/rhel-tools
+# atomic run [REGISTRY]/rhel7/rhel-tools
 docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=rhel-tools -e IMAGE=[REGISTRY]/rhel7/rhel-tools -v /run:/run -v /var/log:/var/log -v /etc/localtime:/etc/localtime -v /:/host [REGISTRY]/rhel7/rhel-tools
 [root@atomic-00 /]#
 ```
 
-* Remember those commands at the end of the Atomic deployment lab?  The ones that didn not work.  Try them again.
+* Remember those commands at the end of the Atomic deployment lab?  The ones that did not work.  Try them again.
 
 ```
 man tcpdump
@@ -293,7 +301,7 @@ Installing file at /host//usr/local/bin/sysstat.sh
 * check the status of the files.
 
 ```
-stat /etc/cron.d/sysstat /etc/sysconfig/sysstat /etc/sysconfig/sysstat.ioconf /usr/local/bin/sysstat.sh
+# stat /etc/cron.d/sysstat /etc/sysconfig/sysstat /etc/sysconfig/sysstat.ioconf /usr/local/bin/sysstat.sh
   File: ‘/etc/cron.d/sysstat’
   Size: 339         Blocks: 8          IO Block: 4096   regular file
 Device: fd00h/64768d    Inode: 12659901    Links: 1
@@ -326,7 +334,7 @@ CONTAINER ID        IMAGE                          COMMAND                CREATE
 * Check the status of the files in /var/log/.
 
 ```
-stat /var/log/sa/sa*
+# stat /var/log/sa/sa*
   File: ‘/var/log/sa/sa24’
   Size: 656         Blocks: 8          IO Block: 4096   regular file
 Device: fd00h/64768d    Inode: 4229027     Links: 1
@@ -341,7 +349,7 @@ Change: 2015-02-25 01:40:07.042784999 +0000
 * Run the RHEL Tools container.
 
 ```
-atomic install [REGISTRY]/rhel7/rhel-tools
+# atomic run [REGISTRY]/rhel7/rhel-tools
 ```
 
 * Once inside the RHEL tools container, run sar and check the output.
