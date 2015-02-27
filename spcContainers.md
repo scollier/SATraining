@@ -106,20 +106,25 @@ On the master node, edit the `/etc/rsyslog.conf` file and point it to the rsyslo
 * Start the rsyslog container on the master node.
 
 ```
-atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
-docker ps -l
+# atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
+docker run -d --privileged --name rsyslog --net=host -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -e IMAGE=rhel7/rsyslog -e NAME=rsyslog --restart=always rhel7/rsyslog /bin/rsyslog.sh
+869edb432c7d172dac0317ac24a3763aa19321461415aaab74e3ac48c58e5bb5
+
+# docker ps -l
+CONTAINER ID        IMAGE                                                  COMMAND             CREATED             STATUS              PORTS               NAMES
+869edb432c7d        [REGISTRY]/rhel7/rsyslog:7.1-3                         "/bin/rsyslog.sh"   30 seconds ago      Up 29 seconds                           rsyslog
 ```
 
 * Now switch to the rsyslog server (node 1).  Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Install rsyslog on the kublet server.
 
 ```
-atomic install [REGISTRY]/rhel7/rsyslog
+# atomic install [REGISTRY]/rhel7/rsyslog
 ```
 
 * Ensure the following entries are in the `/etc/rsyslog.conf`.  Then restart rsyslog. First backup the file.
 
 ```
-cp /etc/rsyslog.conf{,.old}
+# cp /etc/rsyslog.conf{,.old}
 
 
 $ModLoad imklog # reads kernel messages (the same are read from journald)
@@ -134,7 +139,7 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 * Start the rsyslog server.
 
 ```
-atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
+# atomic run --name rsyslog [REGISTRY]/rhel7/rsyslog
 ```
 
 ###Test the configuration.
