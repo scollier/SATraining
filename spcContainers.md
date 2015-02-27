@@ -425,17 +425,18 @@ This example will be a bit more complicated.  We will introduce _systemd_ and mo
 Set up your directory structure.
 
 ```
-mkdir -vp /root/usr/bin; mkdir -vp /root/etc/systemd/system/httpd_template.service; cd /root/.
+mkdir -vp /root/usr/bin; mkdir -vp /root/etc/systemd/system/; cd /root/.
 ```
 
-
-
-We construct a Dockerfile that looks like:
+You can backup or destroy the other Dockerfile.  Construct a new Dockerfile that looks like:
 
 ```
 FROM 		rhel7
 MAINTAINER	Your Name
 ENV container docker
+RUN yum --disablerepo=\* --enablerepo=rhel-7-server-rpms install -y yum-utils
+RUN yum-config-manager --disable \*
+RUN yum-config-manager --enable rhel-7-server-rpms
 RUN yum -y update; yum -y install httpd; yum clean all; systemctl enable httpd
 
 LABEL Version=1.0
