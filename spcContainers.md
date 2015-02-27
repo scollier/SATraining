@@ -24,19 +24,20 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 * Install the container.
 
 ```
-atomic install --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
-docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=docker-registry.usersys.redhat.com/atomcga/rsyslog -e NAME=rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog /bin/install.sh
-Installing file at /host//etc/rsyslog.conf in place of existing empty directory
+atomic install registry.access.stage.redhat.com/rhel7/rsyslog
+Pulling repository registry.access.stage.redhat.com/rhel7/rsyslog
+b5168acccb4c: Download complete 
+Status: Downloaded newer image for registry.access.stage.redhat.com/rhel7/rsyslog:latest
+docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=registry.access.stage.redhat.com/rhel7/rsyslog -e NAME=rsyslog registry.access.stage.redhat.com/rhel7/rsyslog /bin/install.sh
+Creating directory at /host//etc/pki/rsyslog
 Installing file at /host//etc/rsyslog.conf
 Installing file at /host//etc/sysconfig/rsyslog
 ```
 
-* Run the container.
-
+If you have a message about an insecure registry, you will need to edit your /etc/sysconfig/docker file and restart docker. You will need the following line in the file.
 
 ```
-atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
-
+INSECURE_REGISTRY='--insecure-registry registry.access.stage.redhat.com'
 ```
 
 * Check the environment after the install.  You should now see the rsyslog image, but no container yet.
@@ -48,15 +49,12 @@ docker ps -a
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
 
-* Run it         
+* Run the container.
+
 
 ```
-atomic run --name rsyslog docker-registry.usersys.redhat.com/atomcga/rsyslog
-Pulling repository docker-registry.usersys.redhat.com/atomcga/rsyslog
-72fff92e8533: Download complete 
-Status: Downloaded newer image for docker-registry.usersys.redhat.com/atomcga/rsyslog:latest
-docker run -d --privileged --name rsyslog -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run/log:/run/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -v /etc/hostname:/etc/hostname -e IMAGE=docker-registry.usersys.redhat.com/atomcga/rsyslog -e NAME=rsyslog --restart=always docker-registry.usersys.redhat.com/atomcga/rsyslog /bin/rsyslog.sh
-c86ba2e7e205cadfff1facc4ebb820e849c8a8cc57c22caabffbbe7c7d3d9f8d
+atomic run --name rsyslog registry.access.stage.redhat.com/rhel7/rsyslog
+
 ```
 
 * Check the environment.  Now you should see a running rsyslog container.
