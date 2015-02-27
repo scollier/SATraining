@@ -61,7 +61,7 @@ gunzip rhel-atomic-host-7.qcow2.gz
 
 * Make 3 copy-on-write images, using the downloaded image as a "gold" master.
 
-```
+```bash
 for i in $(seq 3); do qemu-img create -f qcow2 -o backing_file=rhel-atomic-host-7.qcow2 rhel-atomic-host-7-${i}.qcow2 ; done
 ```
 
@@ -91,19 +91,48 @@ sudo -i
 ```
 
 
-* Update all of the atomic hosts. The following commands will change you to the GA.staging tree, which should be what customers will see.
+* Update all of the atomic hosts. The following commands will subscribe you to receive updates and allow you to upgrade your Atomic host.  
+
+**NOTE:** Depending on the version of Atomic that you initially installed, some of the sample output below may differ from what you see.
 
 ```
-atomic host status
-subscription-manager register --serverurl=[stage] --baseurl=[stage] --username=[account_user] --password=[account_pass] --auto-attach
-atomic host upgrade
-```
-This will subscribe the system to the stage environment and upgrade the system to the latest tree in the stage environment.
+# atomic host status
+  TIMESTAMP (UTC)         VERSION     ID             OSNAME               REFSPEC                                                 
+* 2015-02-17 22:30:38     7.1.244     27baa6dee2     rhel-atomic-host     rhel-atomic-host:rhel-atomic-host/7/x86_64/standard     
 
-* Check the atomic tree version
+# subscription-manager register --serverurl=[stage] --baseurl=[stage] --username=[account_user] --password=[account_pass] --auto-attach
+
+# atomic host upgrade
+Updating from: rhel-atomic-host-ostree:rhel-atomic-host/7/x86_64/standard
+
+53 metadata, 321 content objects fetched; 81938 KiB transferred in 71 seconds
+Copying /etc changes: 26 modified, 4 removed, 57 added
+Transaction complete; bootconfig swap: yes deployment count change: 1
+Changed:
+  libgudev1-208-99.atomic.0.el7.x86_64
+  libsmbclient-4.1.12-21.el7_1.x86_64
+  libwbclient-4.1.12-21.el7_1.x86_64
+  python-six-1.3.0-4.el7.noarch
+  redhat-release-atomic-host-7.1-20150219.0.atomic.el7.1.x86_64
+  samba-common-4.1.12-21.el7_1.x86_64
+  samba-libs-4.1.12-21.el7_1.x86_64
+  shadow-utils-2:4.1.5.1-18.el7.x86_64
+  subscription-manager-1.13.22-1.el7.x86_64
+  subscription-manager-plugin-container-1.13.22-1.el7.x86_64
+  subscription-manager-plugin-ostree-1.13.22-1.el7.x86_64
+  systemd-208-99.atomic.0.el7.x86_64
+  systemd-libs-208-99.atomic.0.el7.x86_64
+  systemd-sysv-208-99.atomic.0.el7.x86_64
+Upgrade prepared for next boot; run "systemctl reboot" to start a reboot
+```
+
+* Check the atomic tree version.  The output shows that a new deployment is at the top of the list and that will be the version which will be active after a reboot.
 
 ```
-atomic host status
+# atomic host status
+  TIMESTAMP (UTC)         VERSION     ID             OSNAME               REFSPEC                                                        
+  2015-02-19 20:26:26     7.1.0       5799825b36     rhel-atomic-host     rhel-atomic-host-ostree:rhel-atomic-host/7/x86_64/standard     
+* 2015-02-17 22:30:38     7.1.244     27baa6dee2     rhel-atomic-host     rhel-atomic-host-ostree:rhel-atomic-host/7/x86_64/standard
 ```
 
 Note the `*` identifies the active version.
@@ -111,19 +140,23 @@ Note the `*` identifies the active version.
 * Reboot the VMs to switch to updated tree.
 
 ```
-systemctl reboot
+# systemctl reboot
 ```
 
 * After the VMs have rebooted, SSH into each and enter sudo shell:
 
 ```
-sudo -i
+# sudo -i
 ```
 
 * Check your version with atomic. The `*` pointer should now be on the new tree.
 
 ```
-atomic host status
+# atomic host status
+  TIMESTAMP (UTC)         VERSION     ID             OSNAME               REFSPEC                                                        
+* 2015-02-19 20:26:26     7.1.0       5799825b36     rhel-atomic-host     rhel-atomic-host-ostree:rhel-atomic-host/7/x86_64/standard     
+  2015-02-17 22:30:38     7.1.244     27baa6dee2     rhel-atomic-host     rhel-atomic-host-ostree:rhel-atomic-host/7/x86_64/standard     
+
 ```
 
 * Explore the environment.  What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
