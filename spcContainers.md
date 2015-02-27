@@ -161,16 +161,6 @@ Installing file at /host//etc/rsyslog.conf
 Installing file at /host//etc/sysconfig/rsyslog
 ```
 
-> NOTE: If you have a message about an insecure registry, you will need to edit
-> your `/etc/sysconfig/docker` file and restart docker. You will need the
-> following lines in the file. Note that `ADD_REGISTRY` allows you to add a
-> private registry for pulling and searching images.
->
-> ```
-> INSECURE_REGISTRY='--insecure-registry [PRIVATE_REGISTRY]'
-> ADD_REGISTRY='--add-registry [PRIVATE_REGISTRY]'
-> ```
-
 * Check the environment after the install.  You should now see the rsyslog image, but no container yet.
 
 ```

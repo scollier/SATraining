@@ -159,7 +159,24 @@ Note the `*` identifies the active version.
 
 ```
 
-* Explore the environment.  What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
+## Configure docker to use a private registry
+Integrating a private registry is an important use case for customers. For this lab we add a private registry to pull and search images.
+
+* Edit the `/etc/sysconfig/docker` file and restart docker. You will need the following lines in the file.
+
+```
+ADD_REGISTRY='--add-registry [PRIVATE_REGISTRY]'
+```
+
+**NOTE:** If the private registry is not configured with a CA-signed SSL certificate `docker pull ...` will fail with a message about an insecure registry. In that case add the following line to `/etc/sysconfig/docker`:
+
+```
+INSECURE_REGISTRY='--insecure-registry [PRIVATE_REGISTRY]'
+```
+
+## Explore the environment
+
+What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
 
 ```
 man tcpdump
