@@ -174,6 +174,8 @@ Vendor       : Red Hat, Inc.
 
 ###Using rhel-tools
 
+The rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic host. The tools container leverages the atomic command for installation, activation and management.
+
 * Install the rhel-tools container
 
 ```

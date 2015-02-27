@@ -166,4 +166,17 @@ Name: scollier-atomic-ga-kube-test-acaea32f-667a-4a54-aea3-41d1ac573c1
 ID: CNPB:PLKF:34V3:4ESX:Y3KG:XCUV:RYSQ:ZMHN:TFXF:2ENH:AR3V:MO5Q
 ```
 
+* Explore the environment.  What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
+
+```
+man kubernetes
+
+git
+
+tcpdump
+
+sosreport
+```
+Why wouldn't we include these commands in the Atomic image?
+
 This concludes the deploying Atomic lab.
