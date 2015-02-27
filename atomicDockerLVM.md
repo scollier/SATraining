@@ -74,6 +74,13 @@ CONTAINER ID        IMAGE                                COMMAND                
   Data Space Used: 234.2 MB
 ```
 
+Now, remove the stopped container and notice that the space is freed in Docker storage:
+```
+# docker rm prickly_stallman
+# docker info |grep 'Data Space Used'
+ Data Space Used: 200.3 MB
+```
+
 #**Use bind mounts**
 * Create host directory, label it, use a bind mount to write 50MB of data *outside* the container
 
