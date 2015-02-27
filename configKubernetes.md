@@ -169,7 +169,7 @@ NAME                LABELS              STATUS
 }
 ```
 
-This json file is describing the attributes of the application environment. For example, it is giving it a "kind", "id", "name", "ports", and "image". Since the fedora/apache images doesn't exist in our environment yet, it will be pulled down automatically as part of the deployment process.
+This JSON file is describing the attributes of the application environment. For example, it is giving it a "kind", "id", "name", "ports", and "image". Since the fedora/apache images doesn't exist in our environment yet, it will be pulled down automatically as part of the deployment process.
 
 For more information about which options can go in the schema, check out the docs on the [kubernetes github page](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs).
 
@@ -252,7 +252,7 @@ Now that the pod is known to be running we need a way to find it.  Pods in kuber
 }
 ```
 
-* Load the json file into the kubenetes system
+* Load the JSON file into the kubenetes system
 
 ```bash
 kubectl create -f service.json
