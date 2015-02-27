@@ -8,9 +8,9 @@
 1. Inspect and understand LVM setup
 2. Download images, write inside the container
 3. Use bind mounts and notice that space goes to the host pool
-4. Host storage expansion
+4. More documentation
 
-#**Deployment**
+#**Inspect the system**
 
 * Take note of the automatic storage configuration for Docker by
   looking at the logical volumes. An Atomic Host comes optimized out
@@ -51,6 +51,7 @@ Name: scollier-atomic-ga-kube-test-acaea32f-667a-4a54-aea3-41d1ac573c1
 ID: CNPB:PLKF:34V3:4ESX:Y3KG:XCUV:RYSQ:ZMHN:TFXF:2ENH:AR3V:MO5Q
 ```
 
+#**Download images**
 * Pull a Docker image and notice that the data goes into the pool:
 
 ```
@@ -73,6 +74,14 @@ CONTAINER ID        IMAGE                                COMMAND                
   Data Space Used: 234.2 MB
 ```
 
+Now, remove the stopped container and notice that the space is freed in Docker storage:
+```
+# docker rm prickly_stallman
+# docker info |grep 'Data Space Used'
+ Data Space Used: 200.3 MB
+```
+
+#**Use bind mounts**
 * Create host directory, label it, use a bind mount to write 50MB of data *outside* the container
 
 ```
@@ -89,3 +98,9 @@ after it runs.  However, the data exists on the host filesystem:
 ```
 
 And the space in `df -h` on the host will have increased.
+
+#**More information**
+
+In-progress Atomic storage guide:
+
+http://jenkinscat.gsslab.pnq.redhat.com:8080/job/atomic-branch-yruseva-atomic-storage/lastSuccessfulBuild/artifact/pub_Atomic_Storage/index.html
