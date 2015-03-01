@@ -224,4 +224,4 @@ rhel-tools is an Super Privileged Container, which will be covered in the next p
 
 This concludes the deploying Atomic lab.
 
-## [NEXT LAB](spcContainers.md)
+## [NEXT LAB](atomicDockerLVM.md)
