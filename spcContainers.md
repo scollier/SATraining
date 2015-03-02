@@ -452,6 +452,7 @@ CMD [ "/sbin/init" ]
 
 You also need to create a directory tree under root with three files
 
+Two execable scripts for install and uninstall of the systemd unit file template.
 
 ```
 cat root/usr/bin/install.sh 
@@ -480,6 +481,16 @@ cat root/usr/bin/uninstall.sh
 chroot ${HOST} /usr/bin/systemctl disable /etc/systemd/system/httpd_${NAME}.service
 rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
 ```
+
+Make sure you make them executable.
+
+```
+chmod +x /usr/bin/*.sh
+```
+
+This unit file is an example of how you might want to run a containerized service.
+Rather then use atomic run I build the docker commands into the unit file.  You could
+also use Kubernetes as a mechanism for starting the service.
 
 ```
 cat root/etc/systemd/system/httpd_template.service
