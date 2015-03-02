@@ -443,7 +443,7 @@ LABEL Version=1.0
 LABEL Vendor="Red Hat" License=GPLv3
 LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh"
 LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/uninstall.sh"
-ADD root /
+ADD ./ /
 
 EXPOSE 80
 
@@ -478,7 +478,7 @@ chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.servi
 EOF
 ```
 
-Thse second file is used by the UNINSTALL label in the Dockerfile
+The second file is used by the UNINSTALL label in the Dockerfile
 ```
 # cat << EOF > /root/usr/bin/uninstall.sh 
 
