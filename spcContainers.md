@@ -428,10 +428,10 @@ Set up your directory structure.
 mkdir -vp /root/usr/bin; mkdir -vp /root/etc/systemd/system/; cd /root/.
 ```
 
-You can backup or destroy the other Dockerfile.  Construct a new Dockerfile that looks like:
+You can backup or destroy the other Dockerfile.  Construct a new Dockerfile that looks like (Note the private registry):
 
 ```
-FROM 		rhel7
+FROM 		[PRIVATE_REGISTRY]/rhel7
 MAINTAINER	Your Name
 ENV container docker
 RUN yum --disablerepo=\* --enablerepo=rhel-7-server-rpms install -y yum-utils
