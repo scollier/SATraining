@@ -456,6 +456,7 @@ You also need to create a directory tree under `/root` with three files:
 * `/root/usr/bin/uninstall.sh`
 * `/root/etc/systemd/system/httpd_template.service`
 
+The first file is used by the INSTALL label in the Dockerfile
 ```
 # cat << EOF > /root/usr/bin/install.sh 
 
@@ -477,6 +478,7 @@ chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.servi
 EOF
 ```
 
+This file is used by the UNINSTALL label in the Dockerfile
 ```
 # cat << EOF > /root/usr/bin/uninstall.sh 
 
@@ -486,6 +488,7 @@ rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
 EOF
 ```
 
+The third file defines a `systemd` service that uses `httpd`
 ```
 # cat << EOF > /root/etc/systemd/system/httpd_template.service
 
