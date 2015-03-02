@@ -425,7 +425,7 @@ This example will be a bit more complicated.  We will introduce _systemd_ and mo
 Set up your directory structure.
 
 ```
-mkdir -vp /root/usr/bin; mkdir -vp /root/etc/systemd/system/; cd /root/.
+mkdir -vp /root/root/usr/bin; mkdir -vp /root/root/etc/systemd/system/; cd /root/.
 ```
 
 You can backup or destroy the other Dockerfile.  Construct a new Dockerfile that looks like (Note the private registry):
