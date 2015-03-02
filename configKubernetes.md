@@ -37,7 +37,7 @@ KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 ####Configure the kubernetes services on the master
 
-* Edit `/etc/kubernetes/apiserver` to appear as such.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.
+* Edit `/etc/kubernetes/apiserver` to appear as such.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.  The portal_net IP addresses need to be an IP address range not used anywhere else.  They do not need to be routed.  They do not need to be assigned to anything.  It just must be an unused block of addresses.  Kubernetes will assign "services" one of these addresses.  But traffic to (or from) these addresses will NEVER leave a node.  It's actually the proxy on the local node that reponds to these addresses.  This must be a different unused range than that assigned to flannel.  Flannel specifies the addresses used by pods.  portal_net specifies the addresses used by services.  But in both cases, no infrastructure changes are needed.  Just pict an unused block of addresses.
 
 ```       
 # Comma separated list of nodes in the etcd cluster
@@ -227,7 +227,7 @@ CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 
 ## Create a service to make the pod discoverable ##
 
-Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  Be sure to include an IP for a minion in your cluster!  This IP must be assigned to a minion and be visable on the minion via "ip addr"
+Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and get an IP addresses from flannel.  So finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  By default kubernetes will create an internal IP address for the service (from the portal_net range) which pods can use to find the service.  But we want the web server to be available outside the cluster.  So we need to tell kubernetes how traffic will arrive into the cluster destined for this webserver.  To do so we define a list of "publicIPs".  These need to be actual IP addresses assigned to actual minions.  In configurations like AWS or OpenStack where machines have both a public IP assigned somewhere "in the cloud" and the private IP assigned to the node, you must use the private IP.  This IP must be assigned to a minion and be visable on the minion via "ip addr." This is a list, you may list multiple nodes public IP.
 
 * Create a service on the master by creating a `service.json` file
 
