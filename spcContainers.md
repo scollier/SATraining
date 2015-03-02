@@ -478,7 +478,7 @@ chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.servi
 EOF
 ```
 
-This file is used by the UNINSTALL label in the Dockerfile
+Thse second file is used by the UNINSTALL label in the Dockerfile
 ```
 # cat << EOF > /root/usr/bin/uninstall.sh 
 
