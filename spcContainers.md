@@ -485,7 +485,7 @@ rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
 Make sure you make them executable.
 
 ```
-chmod +x /usr/bin/*.sh
+chmod -v +x usr/bin/*.sh
 ```
 
 This unit file is an example of how you might want to run a containerized service.
