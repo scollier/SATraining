@@ -450,11 +450,14 @@ EXPOSE 80
 CMD [ "/sbin/init" ]
 ```
 
-You also need to create a directory tree under root with three files
+You also need to create a directory tree under root with three files:
 
+* `/root/usr/bin/install.sh`
+* `/root/usr/bin/uninstall.sh`
+* `/root/etc/systemd/system/httpd_template.service`
 
 ```
-cat root/usr/bin/install.sh 
+# cat << EOF > /root/usr/bin/install.sh 
 
 #!/bin/sh
 # Make Data Dirs
@@ -471,18 +474,20 @@ sed -e "s/TEMPLATE/${NAME}/g" etc/systemd/system/httpd_template.service > ${HOST
 
 # Enabled systemd unit file
 chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.service
+EOF
 ```
 
 ```
-cat root/usr/bin/uninstall.sh 
+# cat << EOF > /root/usr/bin/uninstall.sh 
 
 #!/bin/sh
 chroot ${HOST} /usr/bin/systemctl disable /etc/systemd/system/httpd_${NAME}.service
 rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
+EOF
 ```
 
 ```
-cat root/etc/systemd/system/httpd_template.service
+# cat << EOF > /root/etc/systemd/system/httpd_template.service
 
 [Unit]
 Description=The Apache HTTP Server for TEMPLATE
@@ -495,6 +500,7 @@ ExecReload=/usr/bin/docker exec -t TEMPLATE /usr/sbin/httpd $OPTIONS -k graceful
 
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
 
 Now build the container
