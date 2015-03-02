@@ -393,7 +393,7 @@ You can build your own SPC using the Dockerfile and the LABEL options. This lab 
 
 Create a Dockerfile that looks like
 
-```
+```dockerfile
 FROM 		rhel7
 MAINTAINER	Your Name
 ENV container docker
@@ -406,16 +406,16 @@ LABEL RUN="/bin/echo This is the run command"
 Now build the image
 
 ```
-docker build -t test .
+# docker build -t test .
 ```
 
 Now test your image
 
 ```
-docker inspect test
-atomic install test
-atomic run test
-atomic uninstall test
+# docker inspect test
+# atomic install test
+# atomic run test
+# atomic uninstall test
 ```
 
 ###Building your own SPC - Example 2
@@ -425,12 +425,12 @@ This example will be a bit more complicated.  We will introduce _systemd_ and mo
 Set up your directory structure.
 
 ```
-mkdir -vp /root/usr/bin; mkdir -vp /root/etc/systemd/system/; cd /root/.
+# mkdir -vp /root/usr/bin; mkdir -vp /root/etc/systemd/system/; cd /root/.
 ```
 
 You can backup or destroy the other Dockerfile.  Construct a new Dockerfile that looks like (Note the private registry):
 
-```
+```dockerfile
 FROM 		[PRIVATE_REGISTRY]/rhel7
 MAINTAINER	Your Name
 ENV container docker
@@ -450,7 +450,7 @@ EXPOSE 80
 CMD [ "/sbin/init" ]
 ```
 
-You also need to create a directory tree under root with three files:
+You also need to create a directory tree under `/root` with three files:
 
 * `/root/usr/bin/install.sh`
 * `/root/usr/bin/uninstall.sh`
@@ -506,14 +506,14 @@ EOF
 Now build the container
 
 ```
-docker build -t httpd .
+# docker build -t httpd .
 ```
 
 Now you can install multiple apache services with different names and different config data.
 
 ```
-atomic install -n test1 httpd
-atomic install -n test2 httpd
+# atomic install -n test1 httpd
+# atomic install -n test2 httpd
 ```
 
 The Atomic command will create a systemd unit file for each container as well
