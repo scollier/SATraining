@@ -179,6 +179,12 @@ ADD_REGISTRY='--add-registry [PRIVATE_REGISTRY]'
 INSECURE_REGISTRY='--insecure-registry [PRIVATE_REGISTRY]'
 ```
 
+* Restart docker
+
+```
+systemctl restart docker
+```
+
 ## Explore the environment
 
 What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
