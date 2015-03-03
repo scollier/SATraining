@@ -443,9 +443,14 @@ LABEL Version=1.0
 LABEL Vendor="Red Hat" License=GPLv3
 LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh"
 LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/uninstall.sh"
+
+LABEL RUN="docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup httpd"
+
 ADD root /
 
 EXPOSE 80
+
+RUN echo "Apache is Working" > /var/www/html/index.html
 
 CMD [ "/sbin/init" ]
 ```
@@ -531,5 +536,34 @@ The Atomic command will create a systemd unit file for each container as well
 as Log dir under /var/log/CONTAINERNAME, DATADIR under /var/lib/CONTAINERNAME
 and CONFDIR under /etc/CONTAINERNAME which can be used to configure your
 services.
+
+Now you need to run the container:
+
+```
+# atomic run httpd 
+docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup httpd
+1847d02d4a68994e048297dd6e65e093cfe4bc9808479201977595f23251dda1
+```
+
+Now find the port that the httpd container is listening on.
+
+```
+docker ps
+```
+
+Now you can curl that container
+
+```
+# curl http://localhost:<port_from_docker_ps>
+
+# curl http://localhost:49156
+Apache is Working
+
+```
+
+
+
+
+
 
 ## [NEXT LAB](configFlannel.md)
