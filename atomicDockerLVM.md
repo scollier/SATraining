@@ -106,6 +106,8 @@ drwxr-xr-x. 3 root root       26 Feb 27 20:39 ..
 
 And the space in `df -h` on the host will have increased.
 
+#Configuration Merging
+
 * Explore configuration merging.  Execute the following command to look at existing differences.
 
 ```
