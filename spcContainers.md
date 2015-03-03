@@ -393,9 +393,9 @@ You can build your own SPC using the Dockerfile and the LABEL options. This lab 
 
 Create a Dockerfile that looks like
 
-```
-FROM 		rhel7
-MAINTAINER	Your Name
+```dockerfile
+FROM    rhel7
+MAINTAINER  Your Name
 ENV container docker
 
 LABEL INSTALL="/bin/echo This is the install command"
@@ -406,16 +406,16 @@ LABEL RUN="/bin/echo This is the run command"
 Now build the image
 
 ```
-docker build -t test .
+# docker build -t test .
 ```
 
 Now test your image
 
 ```
-docker inspect test
-atomic install test
-atomic run test
-atomic uninstall test
+# docker inspect test
+# atomic install test
+# atomic run test
+# atomic uninstall test
 ```
 
 ###Building your own SPC - Example 2
@@ -425,14 +425,14 @@ This example will be a bit more complicated.  We will introduce _systemd_ and mo
 Set up your directory structure.
 
 ```
-mkdir -vp /root/root/usr/bin; mkdir -vp /root/root/etc/systemd/system/; cd /root/.
+# mkdir -vp /root/root/usr/bin; mkdir -vp /root/root/etc/systemd/system/; cd /root/.
 ```
 
 You can backup or destroy the other Dockerfile.  Construct a new Dockerfile that looks like (Note the private registry):
 
-```
-FROM 		[PRIVATE_REGISTRY]/rhel7
-MAINTAINER	Your Name
+```dockerfile
+FROM    [PRIVATE_REGISTRY]/rhel7
+MAINTAINER  Your Name
 ENV container docker
 RUN yum --disablerepo=\* --enablerepo=rhel-7-server-rpms install -y yum-utils
 RUN yum-config-manager --disable \*
@@ -441,8 +441,8 @@ RUN yum -y update; yum -y install httpd; yum clean all; systemctl enable httpd
 
 LABEL Version=1.0
 LABEL Vendor="Red Hat" License=GPLv3
-LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh"
-LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/uninstall.sh"
+LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh"
+LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/uninstall.sh"
 ADD root /
 
 EXPOSE 80
@@ -450,13 +450,19 @@ EXPOSE 80
 CMD [ "/sbin/init" ]
 ```
 
-You also need to create a directory tree under root with three files
+You also need to create a directory tree under `root` with three files:
 
-Two execable scripts for install and uninstall of the systemd unit file template.
+* `root/usr/bin/install.sh`
+* `root/usr/bin/uninstall.sh`
+* `root/etc/systemd/system/httpd_template.service`
+
+Two executable scripts for install and uninstall of the systemd unit file template.
+
+
+The first file is used by the INSTALL label in the Dockerfile
 
 ```
-cat root/usr/bin/install.sh 
-
+# cat root/usr/bin/install.sh
 #!/bin/sh
 # Make Data Dirs
 mkdir -p ${HOST}/${CONFDIR} ${HOST}/${LOGDIR}/httpd ${HOST}/${DATADIR}
@@ -468,15 +474,16 @@ cp -pR /etc/httpd ${HOST}/${CONFDIR}
 chroot ${HOST} /usr/bin/docker create -v /var/log/${NAME}/httpd:/var/log/httpd:Z -v /var/lib/${NAME}:/var/lib/httpd:Z --name ${NAME} ${IMAGE}
 
 # Install systemd unit file for running container
-sed -e "s/TEMPLATE/${NAME}/g" etc/systemd/system/httpd_template.service > ${HOST}/etc/systemd/system/httpd_${NAME}.service
+sed -e "s/TEMPLATE/${NAME}/g" /etc/systemd/system/httpd_template.service > ${HOST}/etc/systemd/system/httpd_${NAME}.service
 
 # Enabled systemd unit file
 chroot ${HOST} /usr/bin/systemctl enable httpd_${NAME}.service
 ```
 
-```
-cat root/usr/bin/uninstall.sh 
+The second file is used by the UNINSTALL label in the Dockerfile
 
+```
+# cat root/usr/bin/uninstall.sh
 #!/bin/sh
 chroot ${HOST} /usr/bin/systemctl disable /etc/systemd/system/httpd_${NAME}.service
 rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
@@ -485,7 +492,7 @@ rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
 Make sure you make them executable.
 
 ```
-chmod -v +x usr/bin/*.sh
+# chmod -v +x root/usr/bin/*.sh
 ```
 
 This unit file is an example of how you might want to run a containerized service.
@@ -493,8 +500,7 @@ Rather then use atomic run I build the docker commands into the unit file.  You 
 also use Kubernetes as a mechanism for starting the service.
 
 ```
-cat root/etc/systemd/system/httpd_template.service
-
+# cat root/etc/systemd/system/httpd_template.service
 [Unit]
 Description=The Apache HTTP Server for TEMPLATE
 After=docker.service
@@ -511,14 +517,14 @@ WantedBy=multi-user.target
 Now build the container
 
 ```
-docker build -t httpd .
+# docker build -t httpd .
 ```
 
 Now you can install multiple apache services with different names and different config data.
 
 ```
-atomic install -n test1 httpd
-atomic install -n test2 httpd
+# atomic install -n test1 httpd
+# atomic install -n test2 httpd
 ```
 
 The Atomic command will create a systemd unit file for each container as well
