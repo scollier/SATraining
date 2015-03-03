@@ -450,11 +450,11 @@ EXPOSE 80
 CMD [ "/sbin/init" ]
 ```
 
-You also need to create a directory tree under `/root` with three files:
+You also need to create a directory tree under `root` with three files:
 
-* `/root/usr/bin/install.sh`
-* `/root/usr/bin/uninstall.sh`
-* `/root/etc/systemd/system/httpd_template.service`
+* `root/usr/bin/install.sh`
+* `root/usr/bin/uninstall.sh`
+* `root/etc/systemd/system/httpd_template.service`
 
 Two executable scripts for install and uninstall of the systemd unit file template.
 
