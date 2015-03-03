@@ -471,7 +471,7 @@ chroot ${HOST} /usr/bin/docker create -v /var/log/${NAME}/httpd:/var/log/httpd:Z
 sed -e "s/TEMPLATE/${NAME}/g" etc/systemd/system/httpd_template.service > ${HOST}/etc/systemd/system/httpd_${NAME}.service
 
 # Enabled systemd unit file
-chroot ${HOST} /usr/bin/systemctl enable /etc/systemd/system/httpd_${NAME}.service
+chroot ${HOST} /usr/bin/systemctl enable httpd_${NAME}.service
 ```
 
 ```
