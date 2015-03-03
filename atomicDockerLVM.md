@@ -106,4 +106,41 @@ drwxr-xr-x. 3 root root       26 Feb 27 20:39 ..
 
 And the space in `df -h` on the host will have increased.
 
+* Explore configuration merging.  Execute the following command to look at existing differences.
+
+```
+# ostree admin config-diff
+M    adjtime
+M    gshadow
+M    hosts
+M    libuser.conf
+M    login.defs
+M    nsswitch.conf
+<snip>
+```
+
+* Create a file in _/etc/_
+
+```
+# touch /etc/somefile
+```
+
+* Ensure ostree is aware of the new file.
+
+
+```
+# ostree admin config-diff | grep somef
+A    somefile
+```
+
+* Compare _/usr/etc_ to _etc_.  Notice how _somefile_ is not in _/usr/etc_.
+
+```
+# ls /usr/etc/some*
+ls: cannot access /usr/etc/some*: No such file or directory
+ 
+# ls /etc/some*
+/etc/somefile
+```
+
 ## [NEXT LAB](spcContainers.md)
