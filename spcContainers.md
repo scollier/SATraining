@@ -1,12 +1,12 @@
 ## Use SPCs on the Atomic Hosts
 
-The goal here is to explore some of the images that we will be distributing when Atomic GAs.  We are trying to keep the Atomic image as small as possible where it makes sense.  This means that anything else that gets added to the Atomic host will have to be inside a container.  The examples we will go over in this section are rhel-tools, rsyslog, and sadc.  For this to work you need at least two functioning Atomic hosts.
+The goal here is to explore some of the images that we will be distributing when Atomic GAs.  We are trying to keep the Atomic image as small as possible where it makes sense.  This means that anything else that gets added to the Atomic host will have to be inside a container.  The examples we will go over in this section are rhel-tools, rsyslog, and sadc.  For this to work you need at least two functioning Atomic hosts (which will be referred to as node 1 and node 2).
 
 ###Using rhel-tools
 
 As we saw in the previous label, the rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic Host. The tools container leverages the atomic command for installation, activation and management.
 
-* Install the rhel-tools container.  You can do this on the master node.
+* Install the rhel-tools container.  You can do this on node 1.
 
 ```
 # atomic install [REGISTRY]/rhel7/rhel-tools
@@ -138,7 +138,7 @@ The rsyslog container runs in the background for the purposes of managing logs. 
 
 ####Scenario 1: Quick Smoketest
 
-* Check the environment before.  You may have a couple of residual images.  You should not have any rsyslog images. You can perform this on the master node.
+* Check the environment before.  You may have a couple of residual images.  You should not have any rsyslog images. You can perform this on the node 1.
 
 ```
 # docker images
@@ -189,13 +189,13 @@ CONTAINER ID        IMAGE                            COMMAND             CREATED
 55ff84fcc332        [PRIVATE_REGISTRY]/rhel7/rsyslog:7.1-3   "/bin/rsyslog.sh"   2 minutes ago       Up 2 minutes                            rsyslog             
 ```
 
-* How do I use it (scenario 1: single host smoke test)?  In one terminal on the master node, watch the logs.
+* How do I use it (scenario 1: single host smoke test)?  In one terminal on node 1, watch the logs.
 
 ```
 tail -f /var/log/messages
 ```
 
-* In another terminal, still on the master, generate a log.
+* In another terminal, still on node 1, generate a log.
 
 ```
 logger test
@@ -209,7 +209,7 @@ Feb  9 16:31:36 localhost vagrant: test
 
 ####Scenario 2: Remote Logging
 
-Stop the rsyslog container on the master node.  We are going to make a change to the `/etc/rsyslog.conf` file and we will need to re-read that.  Use following steps to stop the container. After the container is stopped you can change the file and restart the container.
+Stop the rsyslog container on node 1.  We are going to make a change to the `/etc/rsyslog.conf` file and we will need to re-read that.  Use following steps to stop the container. After the container is stopped you can change the file and restart the container.
 
 ```
 docker ps
@@ -218,13 +218,13 @@ docker ps -a
 docker rm <container id>
 ```
 
-On the master node, edit the `/etc/rsyslog.conf` file and point it to the rsyslog server.  This lab will use node1 as the rsyslog server.  Use the IP address of node1 here. The entry below is at the bottom of the file.
+On the node 1, edit the `/etc/rsyslog.conf` file and point it to the rsyslog server.  This lab will use node1 as the rsyslog server.  Use the IP address of node1 here. The entry below is at the bottom of the file.
 
 ```
 *.* @@x.x.x.x:514
 ```
 
-* Start the rsyslog container on the master node.
+* Start the rsyslog container on node 1.
 
 ```
 # atomic run --name rsyslog rhel7/rsyslog
@@ -268,7 +268,7 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 
 ###Test the configuration.
 
-* On the Atomic master host open a terminal, make sure rsyslog is started with `atomic` run, and issue command `logger remote test`
+* On node 1 open a terminal, make sure rsyslog is started with `atomic` run, and issue command `logger remote test`
 
 * On the rsyslog server(Node 1), check in the `/var/log/` directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a `syslog.log` file.  Watch that file and issue a few more _logger remote test_ commands.
 
@@ -308,7 +308,7 @@ Vendor       : Red Hat, Inc.
 
 The sadc container is our "system activity data collector", it is the daemon that runs in the background that provides the ongoing performance data that sar parses and presents to you.  This container is meant to run in the background only, it is not an interactive container like rhel-tools.
 
-* Do this on these steps on the master node only.  Install the sadc container.
+* Do this on these steps on node 1 only.  Install the sadc container.
 
 ```
 # atomic install rhel7/sadc
@@ -389,7 +389,7 @@ Linux 3.10.0-229.el7.x86_64 (atomic-00.localdomain) 	02/27/2015 	_x86_64_	(2 CPU
 ###Building your own SPC - Example 1
 
 
-You can build your own SPC using the Dockerfile and the LABEL options. This lab can be done on the master host.
+You can build your own SPC using the Dockerfile and the LABEL options. This lab can be done on node 1.
 
 Create a Dockerfile that looks like
 
