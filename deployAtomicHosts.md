@@ -173,6 +173,12 @@ Integrating a private registry is an important use case for customers. For this 
 ADD_REGISTRY='--add-registry [PRIVATE_REGISTRY]'
 ```
 
+* Restart docker
+
+```
+systemctl restart docker
+```
+
 **NOTE:** If the private registry is not configured with a CA-signed SSL certificate `docker pull ...` will fail with a message about an insecure registry. In that case add the following line to `/etc/sysconfig/docker`:
 
 ```
