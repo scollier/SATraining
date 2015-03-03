@@ -95,12 +95,15 @@ sudo -i
 
 **NOTE:** Depending on the version of Atomic that you initially installed, some of the sample output below may differ from what you see.
 
+
 ```
 # atomic host status
   TIMESTAMP (UTC)         VERSION     ID             OSNAME               REFSPEC                                                 
 * 2015-02-17 22:30:38     7.1.244     27baa6dee2     rhel-atomic-host     rhel-atomic-host:rhel-atomic-host/7/x86_64/standard     
 
 # subscription-manager register --serverurl=[stage] --baseurl=[stage] --username=[account_user] --password=[account_pass] --auto-attach
+
+**NOTE:** The below output is an example.  That is what a customer will see once there is a tree update.  What you will see in the lab is that there is "No upgrade Available", this is expected.
 
 # atomic host upgrade
 Updating from: rhel-atomic-host-ostree:rhel-atomic-host/7/x86_64/standard
