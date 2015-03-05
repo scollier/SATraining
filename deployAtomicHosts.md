@@ -179,6 +179,12 @@ ADD_REGISTRY='--add-registry [PRIVATE_REGISTRY]'
 INSECURE_REGISTRY='--insecure-registry [PRIVATE_REGISTRY]'
 ```
 
+* `/etc/sysconfig/docker` includes example ADD_REGISTRY and INSECURE_REGISTRY lines.  Uncomment them and append the [PRIVATE_REGISTRY] FQDN.  For example:
+
+```ADD_REGISTRY='--add-registry my.private.registry.fqdn'
+INSECURE_REGISTRY='--insecure-registry my.private.registry.fqdn'
+```
+
 * Restart docker
 
 ```
