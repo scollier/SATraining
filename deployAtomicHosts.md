@@ -230,12 +230,21 @@ You can also go into the rhel-tools container and explore its contents.
 atomic run rhel7/rhel-tools /bin/sh
 ```
 
-You might even want to create a shell script like the following:
+You might even want to create a shell script like the following on the Atomic host, as a helper script:
 
 ```
 cat /usr/local/bin/man
 #!/bin/sh
 atomic run rhel7/rhel-tools man $@
+
+chmod +x /usr/local/bin/man
+```
+
+This script makes using man pages transparent to the user (even though man  pages are not installed on the Atomic host, only in the rhel-tools container).
+It could also be done with a bash alias.
+
+```
+man tcpdump
 ```
 
 rhel-tools is an Super Privileged Container, which will be covered in the next presentation and lab.
