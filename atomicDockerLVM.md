@@ -1,5 +1,5 @@
 ##**BEFORE YOU ARRIVE**
-    In order to make best use of the lab time please ensure you have:
+    In order to make best use of the lab time, please ensure you have:
 
 1. A running Atomic Host
 
@@ -14,7 +14,7 @@
 
 * Take note of the automatic storage configuration for Docker by
   looking at the logical volumes. An Atomic Host comes optimized out
-  of the box to take advantage of LVM thinpool storage instead of
+  of the box to take advantage of LVM thinpool storage, instead of
   the loopback used with Docker by default.
 
 ```
@@ -60,7 +60,7 @@ ID: CNPB:PLKF:34V3:4ESX:Y3KG:XCUV:RYSQ:ZMHN:TFXF:2ENH:AR3V:MO5Q
  Data Space Used: 177 MB
 ```
 
-* Create a new container, writing 50MB of data *inside* the container.  Note the container persists.
+* Create a new container, writing 50MB of data *inside* the container. Note the container persists.
 
 ```
 # docker run registry.access.redhat.com/rhel7 dd if=/dev/zero of=/var/tmp/data count=100000
@@ -93,8 +93,7 @@ Now, remove the stopped container and notice that the space is freed in Docker s
 51200000 bytes (51 MB) copied, 0.0865377 s, 592 MB/s
 ```
 
-Notice that we used `--rm`, so the container is automatically deleted
-after it runs.  However, the data exists on the host filesystem:
+Notice that we used `--rm`, so the container is automatically deleted after it runs. However, the data exists on the host filesystem:
 
 ```
 # ls -al /var/local/containerdata
@@ -104,11 +103,11 @@ drwxr-xr-x. 3 root root       26 Feb 27 20:39 ..
 -rw-r--r--. 1 root root 51200000 Feb 27 20:40 data
 ```
 
-And the space in `df -h` on the host will have increased.
+The disk usage shown by `df -h` on the host will have increased, even after deleting the container.
 
 ##Configuration Merging
 
-* Explore configuration merging.  Execute the following command to look at existing differences.
+* Explore configuration merging. Execute the following command to look at existing differences:
 
 ```
 # ostree admin config-diff
@@ -135,7 +134,7 @@ M    nsswitch.conf
 A    somefile
 ```
 
-* Compare _/usr/etc_ to _etc_.  Notice how _somefile_ is not in _/usr/etc_.
+* Compare _/usr/etc_ to _etc_. Notice how _somefile_ is not in _/usr/etc_.
 
 ```
 # ls /usr/etc/some*
