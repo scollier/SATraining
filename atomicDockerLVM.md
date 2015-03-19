@@ -8,7 +8,7 @@
 1. Inspect and understand LVM setup
 2. Download images, write inside the container
 3. Use bind mounts and notice that space goes to the host pool
-4. More documentation
+4. Configuration merging
 
 #**Inspect the system**
 
@@ -20,8 +20,8 @@
 ```
 # lvs
   LV          VG       Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
-  docker-pool atomicos twi-a-tz-- 6.69g             0.16   0.20  
-  root        atomicos -wi-ao----  2.94g                                                    
+  docker-pool atomicos twi-aotz-- 16.38g             0.07   0.32                            
+  root        atomicos -wi-ao----  2.94g 
 ```
 
 * Now see how that corresponds to the Docker image and container storage:
