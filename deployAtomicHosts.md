@@ -67,6 +67,10 @@ for i in $(seq 3); do qemu-img create -f qcow2 -o backing_file=rhel-atomic-host-
 
 * Use the following commands to install the images. Note: You will need to change the bridge (br0) to match your setup, or at least confirm it matches what you have.
 
+* For Fedora or CentOS atomic hosts, we need to create cloud init data i.e. atomic0-cidata.iso in below commands. Refer https://www.technovelty.org//linux/running-cloud-images-locally.html
+
+* Use the following commands to install the images. Note: You will need to change the bridge to match your setup, or at least confirm it matches what you have.
+
 ```
 virt-install --import --name atomic-ga-1 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-1.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
 
@@ -95,7 +99,7 @@ sudo -i
 
 **NOTE:** Depending on the version of Atomic that you initially installed, some of the sample output below may differ from what you see.
 
-
+**RHEL Atomic Host**
 ```
 # atomic host status
   TIMESTAMP (UTC)         VERSION     ID             OSNAME               REFSPEC                                                 
@@ -105,6 +109,14 @@ sudo -i
 ```
 
 **NOTE:** The below output is an example.  That is what a customer will see once there is a tree update.  What you will see in the lab is that there is "No upgrade available", this is expected.
+**Fedora Atomic Host**
+```
+# atomic status
+  TIMESTAMP (UTC)         ID             OSNAME            REFSPEC
+* 2014-12-03 01:30:09     ba7ee9475c     fedora-atomic     fedora-atomic:fedora-atomic/f21/x86_64/docker-host
+```
+
+**NOTE:** The below output is an example.  That is what a customer will see once there is a tree update.  What you will see in the lab is that there is "No upgrade Available", this is expected.
 
 ```
 # atomic host upgrade
