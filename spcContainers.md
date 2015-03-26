@@ -1,12 +1,12 @@
-## Use SPCs on the Atomic Hosts
+## Using Super Privileged Containers on Atomic Host
 
-The goal here is to explore some of the images that we will be distributing when Atomic GAs.  We are trying to keep the Atomic image as small as possible where it makes sense.  This means that anything else that gets added to the Atomic host will have to be inside a container.  The examples we will go over in this section are rhel-tools, rsyslog, and sadc.  For this to work you need at least two functioning Atomic hosts (which will be referred to as node 1 and node 2).
+The goal here is to explore some of the images that we will be distributing for Atomic. We are trying to keep the Atomic image as small as possible where it makes sense. This means that anything else that gets added to the Atomic Host will have to be inside a container. The examples we will go over in this section are rhel-tools, rsyslog, and sadc. For this to work, you need at least two functioning Atomic Hosts (which will be referred to as node 1 and node 2).
 
 ###Using rhel-tools
 
-As we saw in the previous label, the rhel-tools container provides the core systems administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic Host. The tools container leverages the atomic command for installation, activation and management.
+As we saw in the previous labs, the rhel-tools container provides the core system administrator and core developer tools to execute tasks on Red Hat Enterprise Linux 7 Atomic Host. The tools container leverages the atomic command for installation, activation and management.
 
-* Install the rhel-tools container.  You can do this on node 1.
+* Install the rhel-tools container. You can do this on whichever system you want to be node 1.
 
 ```
 # atomic install [REGISTRY]/rhel7/rhel-tools
@@ -15,7 +15,7 @@ Pulling repository [REGISTRY]/rhel7/rhel-tools
 Status: Downloaded newer image for [REGISTRY]/rhel7/rhel-tools:latest
 ```
 
-Run the rhel-tools container.  Notice how you are dropped to the prompt inside the container.
+Run the rhel-tools container. Notice how you are dropped to the prompt inside the container.
 
 ```
 # atomic run [REGISTRY]/rhel7/rhel-tools
@@ -23,7 +23,7 @@ docker run -it --name rhel-tools --privileged --ipc=host --net=host --pid=host -
 [root@atomic-00 /]#
 ```
 
-* Remember those commands at the end of the Atomic deployment lab?  The ones that did not work.  Try them again.
+* Remember those commands at the end of the Atomic deployment lab? The ones that did not work? Try them again.
 
 ```
 man tcpdump
@@ -35,7 +35,7 @@ tcpdump
 sosreport
 ```
 
-* Explore the environment.  Check processes.
+* Explore the environment. Check processes:
 
 ```
 # ps aux
@@ -48,7 +48,7 @@ root          7  0.0  0.0      0     0 ?        S    Feb20   0:00 [migration/0]
 <snip>
 ```
 
-* Check the envirionment variables.
+* Check the environment variables:
 
 ```
 # env
@@ -58,7 +58,7 @@ TERM=xterm
 NAME=rhel-tools
 ```
 
-* Run a sosreport.  Notice where it is saved to.  The sosreport tool has been modified to work in a container environment.
+* Run an sosreport. Notice where it is saved to, the sosreport tool has been modified to work in a container environment.
 
 ```
 # sosreport 
@@ -90,12 +90,12 @@ You are back in the host.
 ^d
 ```
 
-You are back in the container.  You may also notice that /run is from the host
-and you see the hosts network and processes.  But you are still in a container.
+You are back in the container. You may also notice that /run is from the host
+and you see the host's network and processes, but you are still in a container.
 
-Lets play around a little more.
+Let's play around a little more.
 
-* Clone a git repo, and save the repo to the host files system, not to the image filesystem.
+* Clone a git repo, and save the repo to the host filesystem, not to the image filesystem.
 
 ```
 # git clone https://github.com/GoogleCloudPlatform/kubernetes.git /host/tmp/kubernetes
@@ -107,7 +107,7 @@ Receiving objects: 100% (48730/48730), 30.44 MiB | 9.63 MiB/s, done.
 Resolving deltas: 100% (32104/32104), done.
 ```
 
-Exit the container and look at the git repo and the sosreport output.  Hit CTRL D to exit the container, or type _exit_.
+Exit the container and look at the git repo and the sosreport output. Hit CTRL-D to exit the container, or type _exit_.
 
 ```
 # ls {/tmp,/var/tmp/}
@@ -121,7 +121,7 @@ sosreport-scollier.12344321-20150225144723.tar.xz  sosreport-scollier.12344321-2
 ```
 less /var/log/messages
 ```
-Notice on a RHEL Atomic host there is no syslog by default.  You can look at the log messages using journald.
+Notice on a RHEL Atomic Host there is no syslog by default. You can look at the log messages using journald.
 
 ```
 journalctl 
@@ -134,11 +134,11 @@ If you want to use rsyslog on your host, you need to install the rsyslog SPC con
 The rsyslog container runs in the background for the purposes of managing logs. We will cover two scenarios:
 
 1. Quick smoke test to make sure logging is working on the localhost.
-2. Remote logging.  We will send some logs over the network.
+2. Remote logging, where we will send some logs over the network to another system.
 
 ####Scenario 1: Quick Smoketest
 
-* Check the environment before.  You may have a couple of residual images.  You should not have any rsyslog images. You can perform this on the node 1.
+* Check the environment before starting, you may have a few residual images. You should not have any rsyslog images. Perform this on node 1:
 
 ```
 # docker images
@@ -148,7 +148,7 @@ REPOSITORY                                               TAG                 IMA
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
 
-* Install the container.
+* Install the container:
 
 ```
 # atomic install rhel7/rsyslog
@@ -161,7 +161,7 @@ Installing file at /host//etc/rsyslog.conf
 Installing file at /host//etc/sysconfig/rsyslog
 ```
 
-* Check the environment after the install.  You should now see the rsyslog image, but no container yet.
+* Check the environment after the install. You should now see the rsyslog image, but no container yet.
 
 ```
 # docker images
@@ -173,7 +173,7 @@ REPOSITORY                                               TAG                 IMA
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
 
-* Run the container.
+* Run the container:
 
 ```
 # atomic run --name rsyslog rhel7/rsyslog
@@ -181,7 +181,7 @@ docker run -d --privileged --name rsyslog --net=host -v /etc/pki/rsyslog:/etc/pk
 21f8ce9ce852157f048614d9ee8d2c111079ce793f6b4ad80972a50f293977bf
 ```
 
-* Check the environment.  Now you should see a running rsyslog container.
+* Check the environment, you should now see a running rsyslog container:
 
 ```
 # docker ps -a
@@ -189,7 +189,7 @@ CONTAINER ID        IMAGE                            COMMAND             CREATED
 55ff84fcc332        [PRIVATE_REGISTRY]/rhel7/rsyslog:7.1-3   "/bin/rsyslog.sh"   2 minutes ago       Up 2 minutes                            rsyslog             
 ```
 
-* How do I use it (scenario 1: single host smoke test)?  In one terminal on node 1, watch the logs.
+* How do I use it (scenario 1: single host smoke test)? In a terminal on node 1, watch the logs.
 
 ```
 tail -f /var/log/messages
@@ -209,7 +209,7 @@ Feb  9 16:31:36 localhost vagrant: test
 
 ####Scenario 2: Remote Logging
 
-Stop the rsyslog container on node 1.  We are going to make a change to the `/etc/rsyslog.conf` file and we will need to re-read that.  Use following steps to stop the container. After the container is stopped you can change the file and restart the container.
+Stop the rsyslog container on node 1. We are going to make a change to the `/etc/rsyslog.conf` file and we will need to re-read that. Use the following steps to stop the container. After the container is stopped, you can change the file and restart the container.
 
 ```
 docker ps
@@ -218,7 +218,7 @@ docker ps -a
 docker rm <container id>
 ```
 
-On the node 1, edit the `/etc/rsyslog.conf` file and point it to the rsyslog server.  This lab will use node1 as the rsyslog server.  Use the IP address of node1 here. The entry below is at the bottom of the file.
+On node 1, edit the `/etc/rsyslog.conf` file and point it to the rsyslog server. This lab will use your second node, node 2, as the rsyslog server. Point the config file at the IP address of node 2, at the bottom of the file:
 
 ```
 *.* @@x.x.x.x:514
@@ -236,19 +236,19 @@ CONTAINER ID        IMAGE                                                  COMMA
 869edb432c7d        [PRIVATE_REGISTRY]/rhel7/rsyslog:7.1-3                         "/bin/rsyslog.sh"   30 seconds ago      Up 29 seconds                           rsyslog
 ```
 
-* Now switch to the rsyslog server (node 1).  Configure the rsyslog server.  In this case, the rsyslog server will be minion / kublet 1 server. Install rsyslog on the kublet server.
+* Now that the container is running, switch to the rsyslog server (node 2) and configure it. Install rsyslog on node 2:
 
 ```
 # atomic install rhel7/rsyslog
 ```
 
-* Ensure the following entries are in the `/etc/rsyslog.conf`.  Then restart rsyslog. First backup the file.
+* Ensure the following entries are in the `/etc/rsyslog.conf` and then restart rsyslog. Ensure you backup the file first:
 
 ```
 # cp /etc/rsyslog.conf{,.old}
 ```
 
-Then append the `/etc/rsyslog.conf` file with these lines.
+Then, append the `/etc/rsyslog.conf` file with these lines. While some simply need to be uncommented, you will need to manually add a few lines as well:
 
 ```
 $ModLoad imklog # reads kernel messages (the same are read from journald)
@@ -260,7 +260,7 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 *.* ?FILENAME
 ```
 
-* Start the rsyslog server.
+* Start the rsyslog server:
 
 ```
 # atomic run --name rsyslog rhel7/rsyslog
@@ -268,9 +268,9 @@ $template FILENAME,"/var/log/%fromhost-ip%/syslog.log"
 
 ###Test the configuration.
 
-* On node 1 open a terminal, make sure rsyslog is started with `atomic` run, and issue command `logger remote test`
+* On node 1 open a terminal, make sure rsyslog is started with `atomic` run, and issue the command `logger remote test`.
 
-* On the rsyslog server(Node 1), check in the `/var/log/` directory. You should see a directory that has the IP address of the atomic server.  In that directory will be a `syslog.log` file.  Watch that file and issue a few more _logger remote test_ commands.
+* On the rsyslog server (node 2), check in the `/var/log/` directory. You should see a directory that has the IP address of the Atomic server (node 1). That directory will have a `syslog.log` file, keep an eye on that file while you run a few more _logger remote test_ commands.
 
 ```
 # tail -f /var/log/192.168.121.228/syslog.log
@@ -290,7 +290,7 @@ Stop the container and remove the image
 
 ### More on the Atomic command
 
-* What is the Docker run command being passed to Atomic?  Below, you can see that there are a couple of different labels.  These are part of the Dockerfile that was used to construct this image.  The RUN label shows all the parameters that need to be passed to Docker in order to successfully run this rsyslog image.  As you can see, by embedding that into the container and calling it with the Atomic command, it is a lot easier on the user.  Basically, we are abstracting away that complex command.
+* What is the Docker run command being passed to Atomic? Below, you can see that there are a couple of different labels. These are part of the Dockerfile that was used to construct this image. The RUN label shows all the parameters that need to be passed to Docker in order to successfully run this rsyslog image. As you can see, by embedding that into the container and calling it with the Atomic command, it is a lot easier on the user. Atomic abstracts away some of the potential complexity of the docker command.
 
 ```
 # atomic info rhel7/rsyslog
@@ -306,9 +306,9 @@ Vendor       : Red Hat, Inc.
 
 ###Using sadc
 
-The sadc container is our "system activity data collector", it is the daemon that runs in the background that provides the ongoing performance data that sar parses and presents to you.  This container is meant to run in the background only, it is not an interactive container like rhel-tools.
+The sadc container is our "system activity data collector", it is the daemon that runs in the background that provides the ongoing performance data that sar parses and presents to you. This container is meant to run in the background only, it is not an interactive container like rhel-tools.
 
-* Do this on these steps on node 1 only.  Install the sadc container.
+* Do these steps on node 1 only. Install the sadc container:
 
 ```
 # atomic install rhel7/sadc
@@ -322,7 +322,7 @@ Installing file at /host//etc/sysconfig/sysstat.ioconf
 Installing file at /host//usr/local/bin/sysstat.sh
 ```
 
-* check the status of the files.
+* Check the status of the files:
 
 ```
 # stat /etc/cron.d/sysstat /etc/sysconfig/sysstat /etc/sysconfig/sysstat.ioconf /usr/local/bin/sysstat.sh
@@ -343,7 +343,7 @@ Change: 2015-02-25 01:37:39.262403129 +0000
 
 ```
 
-* Run the container. Ensure the container is running.
+* Run the container and ensure the container is running:
 
 ```
 # atomic run rhel7/sadc
@@ -355,7 +355,7 @@ CONTAINER ID        IMAGE                          COMMAND                CREATE
 79bf6243c05a        [PRIVATE_REGISTRY]/rhel7/sadc:7.1-3    "/usr/local/bin/syss"   33 seconds ago      Up 32 seconds                           sadc              
 ```
 
-* Check the status of the files in /var/log/.
+* Check the status of the files in /var/log/:
 
 ```
 # stat /var/log/sa/sa*
@@ -370,13 +370,13 @@ Change: 2015-02-25 01:40:07.042784999 +0000
  Birth: -
 ```
 
-* Run the RHEL Tools container.
+* Run the RHEL Tools container:
 
 ```
 # atomic run rhel7/rhel-tools
 ```
 
-* Once inside the RHEL tools container, run sar and check the output.
+* Once inside the RHEL Tools container, run sar and check the output:
 
 ```
 # sar
@@ -391,7 +391,7 @@ Linux 3.10.0-229.el7.x86_64 (atomic-00.localdomain) 	02/27/2015 	_x86_64_	(2 CPU
 
 You can build your own SPC using the Dockerfile and the LABEL options. This lab can be done on node 1.
 
-Create a Dockerfile that looks like
+Create a Dockerfile (name it Dockerfile) that looks like:
 
 ```dockerfile
 FROM    rhel7
@@ -403,13 +403,13 @@ LABEL UNINSTALL="/bin/echo This is the uninstall command"
 LABEL RUN="/bin/echo This is the run command"
 ```
 
-Now build the image
+Now build the image:
 
 ```
 # docker build -t test .
 ```
 
-Now test your image
+Once built, you can test your image:
 
 ```
 # docker inspect test
@@ -420,15 +420,15 @@ Now test your image
 
 ###Building your own SPC - Example 2
 
-This example will be a bit more complicated.  We will introduce _systemd_ and more complex _labels_. 
+This example will be a bit more complicated. We will introduce _systemd_ and more complex _labels_. 
 
-Set up your directory structure.
+Set up your directory structure on node 1:
 
 ```
 # mkdir -vp /root/root/usr/bin; mkdir -vp /root/root/etc/systemd/system/; cd /root/.
 ```
 
-You can backup or destroy the other Dockerfile.  Construct a new Dockerfile that looks like (Note the private registry):
+You can backup or destroy the other Dockerfile. Construct a new Dockerfile (using a private registry) that looks like:
 
 ```dockerfile
 FROM    [PRIVATE_REGISTRY]/rhel7
@@ -464,10 +464,10 @@ You also need to create a directory tree under `root` with three files:
 Two executable scripts for install and uninstall of the systemd unit file template.
 
 
-The first file is used by the INSTALL label in the Dockerfile
+The first file is used by the INSTALL label in the Dockerfile:
 
 ```
-# cat root/usr/bin/install.sh
+# vi root/usr/bin/install.sh
 #!/bin/sh
 # Make Data Dirs
 mkdir -p ${HOST}/${CONFDIR} ${HOST}/${LOGDIR}/httpd ${HOST}/${DATADIR}
@@ -485,23 +485,23 @@ sed -e "s/TEMPLATE/${NAME}/g" /etc/systemd/system/httpd_template.service > ${HOS
 chroot ${HOST} /usr/bin/systemctl enable httpd_${NAME}.service
 ```
 
-The second file is used by the UNINSTALL label in the Dockerfile
+The second file is used by the UNINSTALL label in the Dockerfile:
 
 ```
-# cat root/usr/bin/uninstall.sh
+# vi root/usr/bin/uninstall.sh
 #!/bin/sh
 chroot ${HOST} /usr/bin/systemctl disable /etc/systemd/system/httpd_${NAME}.service
 rm -f ${HOST}/etc/systemd/system/httpd_${NAME}.service
 ```
 
-Make sure you make them executable.
+Make sure you make them executable:
 
 ```
 # chmod -v +x root/usr/bin/*.sh
 ```
 
 This unit file is an example of how you might want to run a containerized service.
-Rather then use atomic run I build the docker commands into the unit file.  You could
+Instead of using atomic run, I built the docker commands into the unit file. You could
 also use Kubernetes as a mechanism for starting the service.
 
 ```
@@ -519,13 +519,13 @@ ExecReload=/usr/bin/docker exec -t TEMPLATE /usr/sbin/httpd $OPTIONS -k graceful
 WantedBy=multi-user.target
 ```
 
-Now build the container
+With those files created, build the container:
 
 ```
 # docker build -t httpd .
 ```
 
-Now you can install multiple apache services with different names and different config data.
+You can install multiple apache services with different names and different config data:
 
 ```
 # atomic install -n test1 httpd
@@ -545,13 +545,13 @@ docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup httpd
 1847d02d4a68994e048297dd6e65e093cfe4bc9808479201977595f23251dda1
 ```
 
-Now find the port that the httpd container is listening on.
+Locate the port that the httpd container is listening on:
 
 ```
 docker ps
 ```
 
-Now you can curl that container
+Finally, you can curl that container and see if apache is running:
 
 ```
 # curl http://localhost:<port_from_docker_ps>

@@ -1,27 +1,27 @@
 ##**BEFORE YOU ARRIVE**
-    In order to make best use of the lab time please review the deployment options and ensure either 
+    In order to make best use of the lab time, please review the deployment options and ensure either:
 
 1. A working KVM environment or
-2. Access to an OpenStack environment.
+2. Access to an OpenStack environment
 
 ##**Agenda / High Level Overview:**
 
 1. Deploy Atomic Hosts
 2. Configure Flannel
-3. Configure K8s
+3. Configure Kubernetes
 4. Deploy an Application
-5. Use SPCs on the Atomic Hosts
+5. Use Super Privileged Containers on the Atomic Hosts
 
 
 #**Deployment**
-There are many ways to deploy an Atomic host.  In this lab, we provide guidance for OpenStack or local KVM.
+There are many ways to deploy an Atomic Host. In this lab, we provide guidance for OpenStack or local KVM.
 
 ##**Deployment Option 1: Atomic Hosts on OpenStack**
-You may use an OpenStack service.
+You may use an OpenStack service, which needs to have a keypair and a security group already configured.
 
 1. Navigate to Instances
 1. Click "Launch Instances"
-1 Complete form
+1 Complete dialog
   1. Details tab
     * Instance name: arbitrary name. Note the UUID of the image will be appended to the instance name. You may want to use your name in the image so you can easily find it.
     * Flavor: *m1.medium*
@@ -29,11 +29,11 @@ You may use an OpenStack service.
     * Instance Boot Source: *Boot from image*
       * Image name: *[atomic_image]*
   1. Access & Security tab
-    * select you keypair that was uploaded during OpenStack account setup.
+    * Select your keypair that was uploaded during OpenStack account setup
     * Security Groups: *Default*
 1. Click "Launch"
 
-Three VMs will be created. Once Power State is *Running* you may SSH into the VMs. Your SSH public key will be used.
+Three VMs will be created. Once the Power State is *Running*, you may SSH into the VMs using your matching SSH key. 
 
 * Note: Each instance requires a floating IP address in addition to the private OpenStack `172.x.x.x` address. Your OpenStack tenant may automatically assign a floating IP address. If not, you may need to assign it manually. If no floating IP addresses are available, create them.
   1. Navigate to Access & Security
@@ -43,13 +43,13 @@ Three VMs will be created. Once Power State is *Running* you may SSH into the VM
 * SSH into the VMs with user `cloud-user` and the instance floating IP address. This address will probably be in the `10.3.xx.xx` range.
 
 ```
-ssh cloud-user@10.3.xx.xxx
+ssh -i <private SSH key> cloud-user@10.3.xx.xxx
 ```
 
 
 ##**Deployment Option 2: Atomic Hosts on KVM**
 
-* Grab and extract the Atomic and metadata images from our internal repo.  Use sudo and appropriate permissions.
+* Grab and extract the Atomic and metadata images from our internal repository.  Use sudo and appropriate permissions.
 
 ```
 wget [metadata ISO image]
@@ -65,7 +65,7 @@ gunzip rhel-atomic-host-7.qcow2.gz
 for i in $(seq 3); do qemu-img create -f qcow2 -o backing_file=rhel-atomic-host-7.qcow2 rhel-atomic-host-7-${i}.qcow2 ; done
 ```
 
-* Use the following commands to install the images. Note: You will need to change the bridge to match your setup, or at least confirm it matches what you have.
+* Use the following commands to install the images. Note: You will need to change the bridge (br0) to match your setup, or at least confirm it matches what you have.
 
 ```
 virt-install --import --name atomic-ga-1 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-1.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
@@ -77,9 +77,9 @@ virt-install --import --name atomic-ga-3 --ram 1024 --vcpus 2 --disk path=/var/l
 
 ##**Update VMs**
 
-**NOTE:** We will be working on _all three (3)_ VMs. You will probably want to have three terminal windows open.
+**NOTE:** We will be working on _all three (3)_ VMs. You will probably want to have three terminal windows or tabs open.
 
-* Confirm you can login to the hosts:
+* Confirm you can log in to the hosts:
 
     Username: cloud-user
     Password: atomic (KVM only)
@@ -91,7 +91,7 @@ sudo -i
 ```
 
 
-* Update all of the atomic hosts. The following commands will subscribe you to receive updates and allow you to upgrade your Atomic host.  
+* Update all of the Atomic Hosts. The following commands will subscribe you to receive updates and allow you to upgrade your Atomic Host.  
 
 **NOTE:** Depending on the version of Atomic that you initially installed, some of the sample output below may differ from what you see.
 
@@ -104,7 +104,7 @@ sudo -i
 # subscription-manager register --serverurl=[stage] --baseurl=[stage] --username=[account_user] --password=[account_pass] --auto-attach
 ```
 
-**NOTE:** The below output is an example.  That is what a customer will see once there is a tree update.  What you will see in the lab is that there is "No upgrade Available", this is expected.
+**NOTE:** The below output is an example.  That is what a customer will see once there is a tree update.  What you will see in the lab is that there is "No upgrade available", this is expected.
 
 ```
 # atomic host upgrade
@@ -131,7 +131,7 @@ Changed:
 Upgrade prepared for next boot; run "systemctl reboot" to start a reboot
 ```
 
-* Check the atomic tree version.  The output shows that a new deployment is at the top of the list and that will be the version which will be active after a reboot.
+* Check the atomic tree version. The asterisk indicates the currently running tree. The tree displayed first in the list is the version that will be booted into. In the output below, if the system is rebooted, it will boot into the new 7.1.0 tree.
 
 ```
 # atomic host status
@@ -140,21 +140,19 @@ Upgrade prepared for next boot; run "systemctl reboot" to start a reboot
 * 2015-02-17 22:30:38     7.1.244     27baa6dee2     rhel-atomic-host     rhel-atomic-host-ostree:rhel-atomic-host/7/x86_64/standard
 ```
 
-Note the `*` identifies the active version.
-
-* Reboot the VMs to switch to updated tree.
+* Reboot the VMs to switch to the updated tree.
 
 ```
 # systemctl reboot
 ```
 
-* After the VMs have rebooted, SSH into each and enter sudo shell:
+* After the VMs have rebooted, SSH into each and enter the sudo shell:
 
 ```
 # sudo -i
 ```
 
-* Check your version with atomic. The `*` pointer should now be on the new tree.
+* Check your version with the atomic command. The `*` pointer should now be on the new tree.
 
 ```
 # atomic host status
@@ -165,15 +163,15 @@ Note the `*` identifies the active version.
 ```
 
 ## Configure docker to use a private registry
-Integrating a private registry is an important use case for customers. For this lab we add a private registry to pull and search images.
+Integrating a private registry is an important use case for customers. For this lab, we add a private registry to pull and search images.
 
-* Edit the `/etc/sysconfig/docker` file and restart docker. You will need the following lines in the file.
+* Edit the `/etc/sysconfig/docker` file and restart docker. You will need the following line in the file.
 
 ```
 ADD_REGISTRY='--add-registry [PRIVATE_REGISTRY]'
 ```
 
-**NOTE:** If the private registry is not configured with a CA-signed SSL certificate `docker pull ...` will fail with a message about an insecure registry. In that case add the following line to `/etc/sysconfig/docker`:
+**NOTE:** If the private registry is not configured with a CA-signed SSL certificate `docker pull ...` will fail with a message about an insecure registry. In that case, add the following line to `/etc/sysconfig/docker`:
 
 ```
 INSECURE_REGISTRY='--insecure-registry [PRIVATE_REGISTRY]'
@@ -194,7 +192,7 @@ systemctl restart docker
 
 ## Explore the environment
 
-What can you do?  What can't you do?  You may see a lot of "Command not Found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab.  Type the following commands.  
+What can you do?  What can't you do?  You may see a lot of "Command not found" messages...  We'll explain how to get around that with the rhel-tools container in a later lab. Type the following commands.  
 
 ```
 man tcpdump
@@ -209,15 +207,15 @@ Why wouldn't we include these commands in the Atomic image?
 
 # If you want to add something to Atomic Host, you must build a container
 
-Lets try
+Let's try:
 
 ```
 atomic install rhel7/rhel-tools
 ```
 
-This will install the rhel-tools container, which can be used as the Adminstrators shell.
+This will install the rhel-tools container, which can be used as the administrator's shell.
 
-Now lets try
+Now let's try:
 
 ```
 atomic run rhel7/rhel-tools man tcpdump
@@ -230,24 +228,24 @@ You can also go into the rhel-tools container and explore its contents.
 atomic run rhel7/rhel-tools /bin/sh
 ```
 
-You might even want to create a shell script like the following on the Atomic host, as a helper script:
+You might even want to create a shell script like the following on the Atomic Host as a helper script:
 
 ```
-cat /usr/local/bin/man
+vi /usr/local/sbin/man
 #!/bin/sh
 atomic run rhel7/rhel-tools man $@
 
-chmod +x /usr/local/bin/man
+chmod +x /usr/local/sbin/man
 ```
 
-This script makes using man pages transparent to the user (even though man  pages are not installed on the Atomic host, only in the rhel-tools container).
+This script makes using man pages transparent to the user (even though man pages are not installed on the Atomic Host, only in the rhel-tools container).
 It could also be done with a bash alias.
 
 ```
 man tcpdump
 ```
 
-rhel-tools is an Super Privileged Container, which will be covered in the next presentation and lab.
+rhel-tools is a Super Privileged Container, which will be covered in the next presentation and lab.
 
 This concludes the deploying Atomic lab.
 
