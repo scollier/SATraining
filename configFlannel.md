@@ -22,7 +22,7 @@ rpm -qc kubernetes
 rpm -qc flannel
 ```
 
-Perform the following on the master node (pick one):
+**Perform the following commands on the master node (pick one node as master):**
 
 * Look at networking before flannel configuration.
 
@@ -144,7 +144,7 @@ FLANNEL_OPTIONS="eth0"
 
 Now that master is configured, lets configure the other nodes called "minions" (minion{1,2}).
 
-**Perform the following on the other two atomic host minions:**
+**Perform the following commands on the other two atomic host minions:**
 
 * Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your `/etc/hosts` file for name resolution here.  If there are any issues, just fall back to IP addresses for now. **NOTE:** For OpenStack nodes use the *private IP address* of the master.
 
