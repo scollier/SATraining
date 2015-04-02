@@ -146,7 +146,9 @@ Now that master is configured, lets configure the other nodes called "minions" (
 
 **Perform the following commands on the other two atomic host minions:**
 
-* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your `/etc/hosts` file for name resolution here.  If there are any issues, just fall back to IP addresses for now. **NOTE:** For OpenStack nodes use the *private IP address* of the master.
+* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your `/etc/hosts` file for name resolution here.  If there are any issues, just fall back to IP addresses for now.
+
+*NOTE:* Use the master node IP address here. For OpenStack nodes use the *private IP address* of the master.
 
 
 ```
@@ -178,8 +180,9 @@ From the master:
 # ip a l flannel.1
 ```
 
-From any node in the cluster, check the cluster members by issuing a query to etcd via curl.  You should see that three servers have consumed subnets.  You can associate those subnets to each server by the MAC address that is listed in the output.
+From any node in the cluster, check the cluster members by issuing a query to etcd server via curl.  You should see that three servers have consumed subnets.  You can associate those subnets to each server by the MAC address that is listed in the output.
 
+*Here the etcd server is the master node*
 
 ```
 # curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.tool
@@ -237,7 +240,7 @@ inet 18.0.81.1/24 scope global docker0
 valid_lft forever preferred_lft forever
 ```
 
-Do not move forward until all three nodes have the docker and flannel interfaces on the same subnet.
+*Do not move forward until all three nodes have the docker and flannel interfaces on the same subnet.*
 
 At this point the flannel cluster is set up and we can test it. We have etcd running on the master node and flannel / Docker running on minion{1,2} minions. Next steps are for testing cross-host container communication which will confirm that Docker and flannel are configured properly.
 
