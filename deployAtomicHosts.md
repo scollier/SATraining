@@ -109,6 +109,7 @@ sudo -i
 ```
 
 **NOTE:** The below output is an example.  That is what a customer will see once there is a tree update.  What you will see in the lab is that there is "No upgrade available", this is expected.
+
 **Fedora Atomic Host**
 ```
 # atomic status
