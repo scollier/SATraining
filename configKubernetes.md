@@ -93,8 +93,7 @@ KUBELET_ADDRESS="--address=0.0.0.0"
 # unless you used what hostname -f shows in KUBELET_ADDRESSES.
 KUBELET_HOSTNAME="--hostname_override=LOCAL_MINION_ETH0_ADDRESS"
 
-# We are (mis)using KUBE_ETCD_SERVERS.  In a future release this will be KUBE_API_SERVERS.
-KUBE_ETCD_SERVERS="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
+KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Add your own!
 KUBELET_ARGS="--auth_path=/var/lib/kubelet/auth"
