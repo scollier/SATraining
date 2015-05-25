@@ -70,11 +70,11 @@ for i in $(seq 3); do qemu-img create -f qcow2 -o backing_file=rhel-atomic-host-
 * For Fedora or CentOS atomic hosts, we need to create cloud init data i.e. atomic0-cidata.iso in below commands. Refer https://www.technovelty.org//linux/running-cloud-images-locally.html
 
 ```
-virt-install --import --name atomic-ga-1 --os-variant=rhel7.0 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-1.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
+virt-install --import --name atomic-ga-1 --os-variant=rhel7.0 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-1.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom,readonly=on --network bridge=br0
 
-virt-install --import --name atomic-ga-2 --os-variant=rhel7.0 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-2.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
+virt-install --import --name atomic-ga-2 --os-variant=rhel7.0 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-2.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom,readonly=on --network bridge=br0
 
-virt-install --import --name atomic-ga-3 --os-variant=rhel7.0 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-3.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom --network bridge=br0 --force
+virt-install --import --name atomic-ga-3 --os-variant=rhel7.0 --ram 1024 --vcpus 2 --disk path=/var/lib/libvirt/images/rhel-atomic-host-7-3.qcow2,format=qcow2,bus=virtio --disk path=/var/lib/libvirt/images/atomic0-cidata.iso,device=cdrom,readonly=on --network bridge=br0
 ```
 
 ##**Update VMs**
