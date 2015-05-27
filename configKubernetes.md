@@ -121,10 +121,10 @@ done
 * Check to make sure the cluster can see the minions from the master.
 
 ```
-# kubectl get minions
-NAME                LABELS              STATUS
-192.168.121.147     <none>              Ready
-192.168.121.101     <none>              Ready
+$ kubectl get nodes
+NAME           LABELS        STATUS
+192.168.121.147   Schedulable   <none>    Ready
+192.168.121.101   Schedulable   <none>    Ready
 ```
 
 **The cluster should be running! Launch a test pod.**
