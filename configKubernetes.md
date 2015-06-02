@@ -7,7 +7,7 @@ The kubernetes package provides several services
 * kube-controller-manager
 * kubelet, kube-proxy
 
-These services are managed by systemd and the configuration resides in a central location, `/etc/kubernetes`. We will break the services up between the hosts.  The first host, *master*, will be the kubernetes master.  This host will run kube-apiserver, kube-controller-manager, and kube-scheduler. In addition, the master will also run _etcd_. The remaining hosts, the *minions* or *nodes*, will run kubelet, proxy, cadvisor and docker.
+These services are managed by systemd and the configuration resides in a central location, `/etc/kubernetes`. We will break the services up between the hosts.  The first host, *master*, will be the kubernetes master.  This host will run kube-apiserver, kube-controller-manager, and kube-scheduler. In addition, the master will also run _etcd_. The remaining hosts, known as *nodes*, will run kubelet, proxy, cadvisor and docker.
 
 ###Prepare the hosts
 
@@ -53,11 +53,11 @@ KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
 KUBE_API_ARGS=""
 ```
 
-* Edit `/etc/kubernetes/controller-manager` to appear as such.  Substitute your minion IPs here in place of the MINION_PRIV_IP_{1,2} placeholder.
+* Edit `/etc/kubernetes/controller-manager` to appear as such.  Substitute your node IPs here in place of the NODE_PRIV_IP_{1,2} placeholder.
 
 ```
 # Comma separated list of minions
-KUBELET_ADDRESSES="--machines=MINION_PRIV_IP_1,MINION_PRIV_IP_2"
+KUBELET_ADDRESSES="--machines=NODE_PRIV_IP_1,NODE_PRIV_IP_2"
 ```
 
 * Start the appropriate services on master:
@@ -70,20 +70,20 @@ for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do
 done
 ```
 
-####Configure the kubernetes services on the minions
+####Configure the kubernetes services on the nodes
 
-**NOTE:** Make these changes on each minion.
+**NOTE:** Make these changes on each node.
 
 ***We need to configure and start the kubelet and proxy***
 
-**UGLY** Due to a bug in kubernetes we must configure an empty JSON authorization file on each minion.
-* Create the JSON file by running the following on all minions
+**UGLY** Due to a bug in kubernetes we must configure an empty JSON authorization file on each node.
+* Create the JSON file by running the following on all nodes
 
 ```bash
 echo "{}" > /var/lib/kubelet/auth
 ```
 
-* Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet or minion IP addresses appropriately. You have to make two changes below.
+* Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet or node IP addresses appropriately. You have to make two changes below.
 
 ```
 # The address for the info server to serve on
@@ -91,7 +91,7 @@ KUBELET_ADDRESS="--address=0.0.0.0"
 
 # this MUST match what you used in KUBELET_ADDRESSES on the controller manager
 # unless you used what hostname -f shows in KUBELET_ADDRESSES.
-KUBELET_HOSTNAME="--hostname_override=LOCAL_MINION_ETH0_ADDRESS"
+KUBELET_HOSTNAME="--hostname_override=LOCAL_NODE_ETH0_ADDRESS"
 
 KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 
@@ -106,7 +106,7 @@ KUBELET_ARGS="--auth_path=/var/lib/kubelet/auth"
 KUBE_PROXY_ARGS="--master=http://MASTER_PRIV_IP_ADDR:8080"
 ```
 
-* Start the appropriate services on the minions.
+* Start the appropriate services on the nodes.
 
 ```bash
 for SERVICES in kube-proxy kubelet docker; do
@@ -118,7 +118,7 @@ done
 
 *You should be finished!*
 
-* Check to make sure the cluster can see the minions from the master.
+* Check to make sure the cluster can see the nodes from the master.
 
 ```
 $ kubectl get nodes
@@ -186,7 +186,7 @@ On the master (master) -
 journalctl -f -l -xn -u kube-apiserver -u kube-scheduler
 ```
 
-* On the minion (minion) -
+* On the node -
 
 ```
 journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
@@ -211,7 +211,7 @@ The state might be 'Pending'. This indicates that docker is still attempting to 
 kubectl get pods --output=json apache
 ```
 
-* Finally, on the minion (minion), check that the pod is available and running.
+* Finally, on the node, check that the pod is available and running.
 
 ```
 docker images
@@ -226,11 +226,11 @@ CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 
 ## Create a service to make the pod discoverable ##
 
-Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any minion and get an IP addresses from flannel.  So finding them is obviously not easy.  You don't want people to have to look up what minion the web server is on before they can find your web page!  Kubernetes solves this with a "service"  By default kubernetes will create an internal IP address for the service (from the portal_net range) which pods can use to find the service.  But we want the web server to be available outside the cluster.  So we need to tell kubernetes how traffic will arrive into the cluster destined for this webserver.  To do so we define a list of "publicIPs".  These need to be actual IP addresses assigned to actual minions.  In configurations like AWS or OpenStack where machines have both a public IP assigned somewhere "in the cloud" and the private IP assigned to the node, you must use the private IP.  This IP must be assigned to a minion and be visable on the minion via "ip addr." This is a list, you may list multiple nodes public IP.
+Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any node and get an IP addresses from flannel.  So finding them is obviously not easy.  You don't want people to have to look up what node the web server is on before they can find your web page!  Kubernetes solves this with a "service"  By default kubernetes will create an internal IP address for the service (from the portal_net range) which pods can use to find the service.  But we want the web server to be available outside the cluster.  So we need to tell kubernetes how traffic will arrive into the cluster destined for this webserver.  To do so we define a list of "publicIPs".  These need to be actual IP addresses assigned to actual nodes.  In configurations like AWS or OpenStack where machines have both a public IP assigned somewhere "in the cloud" and the private IP assigned to the node, you must use the private IP.  This IP must be assigned to a node and be visable on the node via "ip addr." This is a list, you may list multiple nodes public IP.
 
 * Create a service on the master by creating a `service.json` file
 
-**NOTE:** You must use an actual IP address for the `publicIPs` value or the service will not run correctly on the minions
+**NOTE:** You must use an actual IP address for the `publicIPs` value or the service will not run correctly on the nodes
 
 ```json
 {
@@ -243,7 +243,7 @@ Now that the pod is known to be running we need a way to find it.  Pods in kuber
     },
     "port": 80,
     "publicIPs": [
-        "MINION_PRIV_IP_1"
+        "NODE_PRIV_IP_1"
     ],
     "selector": {
         "name": "apache"
@@ -267,7 +267,7 @@ frontend            name=frontend                             name=apache       
 kubernetes          component=apiserver,provider=kubernetes   <none>              10.254.8.30         443
 ```
 
-* Check out how it by looking at the following commands on any minion
+* Check out how it by looking at the following commands on any node 
 
 ```bash
 iptables -nvL -t nat
@@ -277,14 +277,14 @@ journalctl -b -l -u kube-proxy
 * Finally, test that the container is actually working.
 
 ```
-curl http://MINION_PRIV_IP_1/
+curl http://NODE_PRIV_IP_1/
 Apache
 ```
 
-* Now really test it.  If you are using OS1 you should be able to hit the web server from you web browser by going to the PUBLIC IP associated with the minion(s) you chose in your service.
+* Now really test it.  If you are using OS1 you should be able to hit the web server from you web browser by going to the PUBLIC IP associated with the node(s) you chose in your service.
 
 ```
-firefox http://MINION_PUBLIC_IP_1/
+firefox http://NODE_PUBLIC_IP_1/
 ```
 
 * To delete the container.
@@ -356,12 +356,12 @@ CONTROLLER          CONTAINER(S)        IMAGE(S)            SELECTOR            
 apache-controller   my-fedora-apache    fedora/apache       name=apache         1
 ```
 
-* The replication controller should have spawned a pod on a minion.  (This make take a short while, so STATUS may be Unknown at first)
+* The replication controller should have spawned a pod on a node.  (This make take a short while, so STATUS may be Unknown at first)
 
 ```bash
 # kubectl get pods
 POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-minion1/       name=apache         Running
+52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-node1/       name=apache         Running
 ```
 
 Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes `publicIP` balances between ALL of the replicas!
@@ -376,9 +376,9 @@ apache-controller   my-fedora-apache    fedora/apache       name=apache         
 
 # kubectl get pods
 POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-ac23ccfa-be99-11e4-91e5-52540052bd24   18.0.98.3           my-fedora-apache    fedora/apache       kube-minion2/       name=apache         Running
-52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-minion1/       name=apache         Running
-ac22a801-be99-11e4-91e5-52540052bd24   18.0.98.2           my-fedora-apache    fedora/apache       kube-minion2/       name=apache         Running
+ac23ccfa-be99-11e4-91e5-52540052bd24   18.0.98.3           my-fedora-apache    fedora/apache       kube-node2/         name=apache         Running
+52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-node1/         name=apache         Running
+ac22a801-be99-11e4-91e5-52540052bd24   18.0.98.2           my-fedora-apache    fedora/apache       kube-node2/         name=apache         Running
 ```
 
 I suggest you resize to 0 before you delete the replication controller.  Deleting a `replicationController` will leave the pods running.
