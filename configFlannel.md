@@ -150,11 +150,11 @@ FLANNEL_OPTIONS="eth0"
 ```
 
 
-Now that master is configured, lets configure the other nodes called "minions" (minion{1,2}).
+Now that master is configured, lets configure the other nodes (node{1,2}).
 
-**Perform the following commands on the other two atomic host minions:**
+**Perform the following commands on the other two atomic host nodes:**
 
-* Use curl to check firewall settings from each minion to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your `/etc/hosts` file for name resolution here.  If there are any issues, just fall back to IP addresses for now.
+* Use curl to check firewall settings from each node to the master.  We need to ensure connectivity to the etcd service.  You may want to set up your `/etc/hosts` file for name resolution here.  If there are any issues, just fall back to IP addresses for now.
 
 *NOTE:* Use the master node IP address here. For OpenStack nodes use the *private IP address* of the master.
 
@@ -163,11 +163,11 @@ Now that master is configured, lets configure the other nodes called "minions" (
 # curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
 ```
 
-For some of the steps below, it might help to set up ssh keys on the master and copy those over to the minions, e.g. with ssh-copy-id.  You also might want to set hostnames on the minions and edit your `/etc/hosts` files on all nodes to reflect that.
+For some of the steps below, it might help to set up ssh keys on the master and copy those over to the nodes, e.g. with ssh-copy-id.  You also might want to set hostnames on the nodes and edit your `/etc/hosts` files on all nodes to reflect that.
 
 From the master:
 
-* Copy over flannel configuration to the minions, both of them. Use `scp` or copy the file contents manually. In the OS1 (OpenStack) environment, you can not scp files without moving some keys around.  It might just be quicker to copy and paste the contents.  In a KVM hosted environment, feel free to _scp_ files around.
+* Copy over flannel configuration to the nodes, both of them. Use `scp` or copy the file contents manually. In the OS1 (OpenStack) environment, you can not scp files without moving some keys around.  It might just be quicker to copy and paste the contents.  In a KVM hosted environment, feel free to _scp_ files around.
 
 
 ```
@@ -175,14 +175,14 @@ From the master:
 ```
 
 
-* Restart flanneld on both of the minions.
+* Restart flanneld on both of the nodes.
 
 ```
 # systemctl restart flanneld
 # systemctl enable flanneld
 ```
 
-* Check the new interface on both of the minions.
+* Check the new interface on both of the nodes.
 
 ```
 # ip a l flannel.1
@@ -204,7 +204,7 @@ From any node in the cluster, check the cluster members by issuing a query to et
 # cat /run/flannel/subnet.env
 ```
 
-* Check the network on the minion.
+* Check the network on the node.
 
 ```
 # ip a
@@ -250,13 +250,13 @@ valid_lft forever preferred_lft forever
 
 *Do not move forward until all three nodes have the docker and flannel interfaces on the same subnet.*
 
-At this point the flannel cluster is set up and we can test it. We have etcd running on the master node and flannel / Docker running on minion{1,2} minions. Next steps are for testing cross-host container communication which will confirm that Docker and flannel are configured properly.
+At this point the flannel cluster is set up and we can test it. We have etcd running on the master node and flannel / Docker running on node{1,2}. Next steps are for testing cross-host container communication which will confirm that Docker and flannel are configured properly.
 
 ##Test the flannel configuration
 
-From each minion, pull a Docker image for testing. In our case, we will use fedora:20.
+From each node, pull a Docker image for testing. In our case, we will use fedora:20.
 
-* Issue the following on minion1.
+* Issue the following on node1.
 
 
 ```
@@ -279,7 +279,7 @@ valid_lft forever preferred_lft forever
 
 You can see here that the IP address is on the flannel network.
 
-* Issue the following commands on minion2:
+* Issue the following commands on node2:
 
 
 ```
@@ -295,7 +295,7 @@ valid_lft forever preferred_lft forever
 ```
 
 
-* Now, from the container running on minion2, ping the container running on minion1:
+* Now, from the container running on node2, ping the container running on node1:
 
 
 ```
@@ -306,7 +306,7 @@ PING 18.0.81.2 (18.0.81.2) 56(84) bytes of data.
 64 bytes from 18.0.81.2: icmp_seq=4 ttl=62 time=0.306 ms
 ```
 
-* You should have received a reply. That is it. flannel is set up on the two minions and you have cross host communication. Etcd is set up on the master node. Next step is to overlay the cluster with kubernetes.
+* You should have received a reply. That is it. flannel is set up on the two nodes and you have cross host communication. Etcd is set up on the master node. Next step is to overlay the cluster with kubernetes.
 
 Do not move forward until you can ping from container to container on different hosts.
 
@@ -328,6 +328,6 @@ Restart services in this order:
 
 Flannel configures an overlay network that docker uses. `ip a` must show docker and flannel on the same network.
 
-Flannel has file `/usr/lib/systemd/system/docker.service.d/flannel.conf` which sources `/run/flannel/docker`, generated from the `flannel-config.json` file. etcd stores the flannel configuration for the Master. Flannel runs on each node host (minion) to setup a unique class-C container network.
+Flannel has file `/usr/lib/systemd/system/docker.service.d/flannel.conf` which sources `/run/flannel/docker`, generated from the `flannel-config.json` file. etcd stores the flannel configuration for the Master. Flannel runs on each node host to setup a unique class-C container network.
 
 ## [NEXT LAB](configKubernetes.md)
