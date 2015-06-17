@@ -441,7 +441,7 @@ RUN yum -y update; yum -y install httpd; yum clean all; systemctl enable httpd
 
 LABEL Version=1.0
 LABEL Vendor="Red Hat" License=GPLv3
-LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh"
+LABEL INSTALL='docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh'
 LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/uninstall.sh"
 
 LABEL RUN="docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup httpd"
@@ -454,6 +454,10 @@ RUN echo "Apache is Working" > /var/www/html/index.html
 
 CMD [ "/sbin/init" ]
 ```
+
+Notice that we use single quotes around the `INSTALL` label, so that Docker doesn't try to peform
+substitution using variables declared with `ENV` and friends (since Atomic passes these variables
+in at runtime).
 
 You also need to create a directory tree under `root` with three files:
 
