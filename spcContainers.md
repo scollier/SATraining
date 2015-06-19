@@ -440,10 +440,10 @@ RUN yum-config-manager --enable rhel-7-server-rpms
 RUN yum -y update; yum -y install httpd; yum clean all; systemctl enable httpd
 
 LABEL Version=1.0 Vendor="Red Hat" License=GPLv3
-LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh"
-LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/uninstall.sh"
 
-LABEL RUN="docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup httpd"
+LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=\${LOGDIR} -e CONFDIR=\${CONFDIR} -e DATADIR=\${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh"
+LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/uninstall.sh"
+LABEL RUN="docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup IMAGE"
 
 ADD root /
 
