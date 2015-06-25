@@ -30,11 +30,15 @@ rpm -qc flannel
 # ip a
 ```
 
-* Configure etcd to listen on the public IP of the node.  Change the ETCD_LISTEN_CLIENT_URLS from localhost to 0.0.0.0.
+* Configure etcd to listen on the public IP of the node.  Change the ETCD_LISTEN_CLIENT_URLS and ETCD_ADVERTISE_CLIENT_URLS from localhost to 0.0.0.0 and the public IP, respectively.
 
 ```
 # grep ETCD_LISTEN_CLIENT_URLS /etc/etcd/etcd.conf
 ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:4001"
+```
+```
+# grep ETCD_ADVERTISE_CLIENT_URLS /etc/etcd/etcd.conf
+ETCD_ADVERTISE_CLIENT_URLS="http://PUBLIC.IP:4001"
 ```
 
 
