@@ -115,11 +115,15 @@ FLANNEL_OPTIONS="eth0"
 ```
 
 
-* Enable the flanneld service and reboot.
+* Enable the flanneld service, let systemd know that the local flanneld service needs a default route and the local etcd service to be started before it, and reboot.
 
 
 ```
-# systemctl enable flanneld
+# systemctl enable NetworkManager-wait-online.service
+# systemctl enable flanneld.service
+# mkdir /etc/systemd/system/flanneld.service.wants
+# ln -s /usr/lib/systemd/system/etcd.service /etc/systemd/system/flanneld.service.wants/
+# ln -s /usr/lib/systemd/system/NetworkManager-wait-online.service /etc/systemd/system/flanneld.service.wants/
 # systemctl reboot
 ```
 
