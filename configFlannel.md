@@ -258,13 +258,13 @@ At this point the flannel cluster is set up and we can test it. We have etcd run
 
 ##Test the flannel configuration
 
-From each node, pull a Docker image for testing. In our case, we will use fedora:20.
+From each node, pull a Docker image for testing. In our case, we will use rhel-tools.
 
 * Issue the following on node1.
 
 
 ```
-# docker run -it fedora:20 bash
+# docker run -it registry.access.redhat.com/rhel7/rhel-tools
 ```
 
 * This will place you inside the container. Check the IP address.
@@ -287,7 +287,7 @@ You can see here that the IP address is on the flannel network.
 
 
 ```
-# docker run -it fedora:20 bash
+# docker run -it registry.access.redhat.com/rhel7/rhel-tools /bin/bash
 
 # ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
