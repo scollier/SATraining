@@ -273,11 +273,11 @@ From each node, pull a Docker image for testing. In our case, we will use rhel-t
 ```
 # ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
-link/ether 02:42:0a:00:51:02 brd ff:ff:ff:ff:ff:ff
-inet 18.0.81.2/24 scope global eth0
-valid_lft forever preferred_lft forever
-inet6 fe80::42:aff:fe00:5102/64 scope link
-valid_lft forever preferred_lft forever
+    link/ether 02:42:0a:00:51:02 brd ff:ff:ff:ff:ff:ff
+    inet 18.0.81.2/24 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:aff:fe00:5102/64 scope link
+       valid_lft forever preferred_lft forever
 ```
 
 
