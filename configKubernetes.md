@@ -7,7 +7,7 @@ The kubernetes package provides several services
 * kube-controller-manager
 * kubelet, kube-proxy
 
-These services are managed by systemd and the configuration resides in a central location, `/etc/kubernetes`. We will break the services up between the hosts.  The first host, *master*, will be the kubernetes master.  This host will run kube-apiserver, kube-controller-manager, and kube-scheduler. In addition, the master will also run _etcd_. The remaining hosts, known as *nodes*, will run kubelet, proxy, cadvisor and docker.
+These services are managed by systemd and the configuration resides in a central location, `/etc/kubernetes`. We will break the services up between the hosts.  The first host, *master*, will be the kubernetes master.  This host will run _kube-apiserver_, _kube-controller-manager_, and _kube-scheduler_. In addition, the master will also run _etcd_. The remaining hosts, known as *nodes*, will run _kubelet_, _kube-proxy_, and _docker_.
 
 ###Prepare the hosts
 
