@@ -63,10 +63,10 @@ KUBELET_ADDRESSES="--machines=NODE_PRIV_IP_1,NODE_PRIV_IP_2"
 * Start the appropriate services on master:
 
 ```bash
-for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do 
-    systemctl restart $SERVICES
-    systemctl enable $SERVICES
-    systemctl status $SERVICES 
+for SERVICE in etcd kube-apiserver kube-controller-manager kube-scheduler; do
+    systemctl restart $SERVICE
+    systemctl enable  $SERVICE
+    systemctl status  $SERVICE
 done
 ```
 
@@ -109,10 +109,10 @@ KUBE_PROXY_ARGS="--master=http://MASTER_PRIV_IP_ADDR:8080"
 * Start the appropriate services on the nodes.
 
 ```bash
-for SERVICES in kube-proxy kubelet docker; do
-    systemctl restart $SERVICES
-    systemctl enable $SERVICES
-    systemctl status $SERVICES
+for SERVICE in kube-proxy kubelet docker; do
+    systemctl restart $SERVICE
+    systemctl enable  $SERVICE
+    systemctl status  $SERVICE
 done
 ```
 
@@ -177,7 +177,7 @@ kubectl create -f apache.json
 ```
 
 
-* This command exits immediately, returning the value of the label, `apache`. You can monitor progress of the operations with these commands:
+* This command exits immediately, returning the name of the pod, `apache-pod`. You can monitor progress of the operations with these commands:
 On the master (master) -
 
 ```
@@ -195,13 +195,13 @@ journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
 
 ```
 # kubectl get pods
-POD                 IP                  CONTAINER(S)                  IMAGE(S)            HOST                LABELS              STATUS
-apache-pod          18.0.53.3                                                             192.168.121.147/    name=apache         Running
-                                        fedora-apache-container       fedora/apache                                               Running
-mysql-pod           18.0.73.2                                                             192.168.121.101/    name=mysql          Running
-                                        mysql-container               mysql                                                       Running
-redis-master        18.0.53.2                                                             192.168.121.147/    name=redis-master   Running
-                                        master                        dockerfile/redis                                            Running
+POD           IP         CONTAINER(S)             IMAGE(S)            HOST            LABELS             STATUS
+apache-pod    18.0.53.3                                             192.168.121.147/  name=apache        Running
+                         fedora-apache-container  fedora/apache                                          Running
+mysql-pod     18.0.73.2                                             192.168.121.101/  name=mysql         Running
+                         mysql-container          mysql                                                  Running
+redis-master  18.0.53.2                                             192.168.121.147/  name=redis-master  Running
+                         master                   dockerfile/redis                                       Running
 ```
 
 The status might be 'Pending'. This indicates that docker is still attempting to download and launch the container.
@@ -209,16 +209,16 @@ The status might be 'Pending'. This indicates that docker is still attempting to
 * You can get even more information about the pod like this.
 
 ```
-kubectl get pods --output=json apache
+kubectl get pods --output=json apache-pod
 ```
 
 * Finally, on the node, check that the pod is available and running.
 
 ```
 docker images
-REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE
-kubernetes/pause latest 6c4579af347b 7 weeks ago 239.8 kB
-fedora/apache latest 6927a389deb6 3 months ago 450.6 MB
+REPOSITORY       TAG    IMAGE ID     CREATED      VIRTUAL SIZE
+kubernetes/pause latest 6c4579af347b 7 weeks ago  239.8 kB
+fedora/apache    latest 6927a389deb6 3 months ago 450.6 MB
 
 docker ps -l
 CONTAINER ID IMAGE                COMMAND          CREATED       STATUS       PORTS NAMES
@@ -284,10 +284,10 @@ kubectl create -f service.json
 
 ```bash
 # kubectl get services
-NAME                LABELS                                    SELECTOR            IP                  PORT
-kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.254.207.162      80
-frontend-service    name=frontend                             name=apache         10.254.195.231      80
-kubernetes          component=apiserver,provider=kubernetes   <none>              10.254.8.30         443
+NAME              LABELS                                   SELECTOR     IP              PORT
+kubernetes-ro     component=apiserver,provider=kubernetes  <none>       10.254.207.162  80
+frontend-service  name=frontend                            name=apache  10.254.195.231  80
+kubernetes        component=apiserver,provider=kubernetes  <none>       10.254.8.30     443
 ```
 
 * Check out how proxying is done by running the following commands on any node.
@@ -376,16 +376,16 @@ kubectl create -f rc.json
 
 ```bash
 # kubectl get rc
-CONTROLLER          CONTAINER(S)               IMAGE(S)            SELECTOR            REPLICAS
-apache-controller   fedora-apache-container    fedora/apache       name=apache         1
+CONTROLLER         CONTAINER(S)             IMAGE(S)       SELECTOR     REPLICAS
+apache-controller  fedora-apache-container  fedora/apache  name=apache  1
 ```
 
 * The replication controller should have spawned a pod on a node.  (This make take a short while, so STATUS may be Unknown at first)
 
 ```bash
 # kubectl get pods
-POD                                    IP                  CONTAINER(S)               IMAGE(S)            HOST              LABELS              STATUS
-52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           fedora-apache-container    fedora/apache       kube-node1/       name=apache         Running
+POD                                   IP         CONTAINER(S)             IMAGE(S)       HOST         LABELS       STATUS
+52228aef-be99-11e4-91e5-52540052bd24  18.0.79.4  fedora-apache-container  fedora/apache  kube-node1/  name=apache  Running
 ```
 
 Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes `publicIP` balances between ALL of the replicas!
@@ -395,14 +395,14 @@ Feel free to resize the replication controller and run multiple copies of apache
 resized
 
 # kubectl get rc
-CONTROLLER          CONTAINER(S)               IMAGE(S)            SELECTOR            REPLICAS
-apache-controller   fedora-apache-container    fedora/apache       name=apache         3
+CONTROLLER         CONTAINER(S)             IMAGE(S)       SELECTOR     REPLICAS
+apache-controller  fedora-apache-container  fedora/apache  name=apache  3
 
 # kubectl get pods
-POD                                    IP                  CONTAINER(S)               IMAGE(S)            HOST                LABELS              STATUS
-ac23ccfa-be99-11e4-91e5-52540052bd24   18.0.98.3           fedora-apache-container    fedora/apache       kube-node2/         name=apache         Running
-52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           fedora-apache-container    fedora/apache       kube-node1/         name=apache         Running
-ac22a801-be99-11e4-91e5-52540052bd24   18.0.98.2           fedora-apache-container    fedora/apache       kube-node2/         name=apache         Running
+POD                                   IP         CONTAINER(S)             IMAGE(S)       HOST         LABELS       STATUS
+ac23ccfa-be99-11e4-91e5-52540052bd24  18.0.98.3  fedora-apache-container  fedora/apache  kube-node2/  name=apache  Running
+52228aef-be99-11e4-91e5-52540052bd24  18.0.79.4  fedora-apache-container  fedora/apache  kube-node1/  name=apache  Running
+ac22a801-be99-11e4-91e5-52540052bd24  18.0.98.2  fedora-apache-container  fedora/apache  kube-node2/  name=apache  Running
 ```
 
 I suggest you resize to 0 before you delete the replication controller.  Deleting a `replicationController` will leave the pods running.
