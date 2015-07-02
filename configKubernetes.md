@@ -17,7 +17,7 @@ These services are managed by systemd and the configuration resides in a central
 for i in $(ls /etc/kubernetes/*); do cp $i{,.orig}; echo "Making a backup of $i"; done
 ```
 
-**NOTE:** It is important that you replace any exsiting content in the config files below with the new content provided.  You will find that the existing content in the config files may not match what is provided below.  This is expected.
+**NOTE:** It is important that you replace any existing content in the config files below with the new content provided.  You will find that the existing content in the config files may not match what is provided below.  This is expected.
 
 * Edit `/etc/kubernetes/config` to be the same on **all hosts**. For OpenStack VMs we will be using the *private IP address* of the master host.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.
 
@@ -37,9 +37,9 @@ KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 ####Configure the kubernetes services on the master
 
-* Edit `/etc/kubernetes/apiserver` to appear as such.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.  The portal_net IP addresses need to be an IP address range not used anywhere else.  They do not need to be routed.  They do not need to be assigned to anything.  It just must be an unused block of addresses.  Kubernetes will assign "services" one of these addresses.  But traffic to (or from) these addresses will NEVER leave a node.  It's actually the proxy on the local node that reponds to these addresses.  This must be a different unused range than that assigned to flannel.  Flannel specifies the addresses used by pods.  portal_net specifies the addresses used by services.  But in both cases, no infrastructure changes are needed.  Just pict an unused block of addresses.
+* Edit `/etc/kubernetes/apiserver` to appear as such.  Make sure to substitute out the MASTER_PRIV_IP_ADDR placeholder below.  The portal_net IP addresses need to be an IP address range not used anywhere else.  They do not need to be routed.  They do not need to be assigned to anything.  It just must be an unused block of addresses.  Kubernetes will assign "services" one of these addresses.  But traffic to (or from) these addresses will NEVER leave a node.  It's actually the proxy on the local node that reponds to these addresses.  This must be a different unused range than that assigned to flannel.  Flannel specifies the addresses used by pods.  portal_net specifies the addresses used by services.  But in both cases, no infrastructure changes are needed.  Just pick an unused block of addresses.
 
-```       
+```
 # Comma separated list of nodes in the etcd cluster
 KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:4001"
 
@@ -49,7 +49,7 @@ KUBE_API_ADDRESS="--address=0.0.0.0"
 # Address range to use for services
 KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
 
-# Add you own!
+# Add your own!
 KUBE_API_ARGS=""
 ```
 
@@ -102,7 +102,7 @@ KUBELET_ARGS="--auth_path=/var/lib/kubelet/auth"
 * edit `/etc/kubernetes/proxy` to appear as below.
 
 ```
-# How the proxy find the apiserver
+# How the proxy finds the apiserver
 KUBE_PROXY_ARGS="--master=http://MASTER_PRIV_IP_ADDR:8080"
 ```
 
@@ -166,7 +166,7 @@ NAME              LABELS    STATUS
 }
 ```
 
-This JSON file is describing the attributes of the application environment. For example, it is giving it a "kind", "id", "name", "ports", and "image". Since the fedora/apache images doesn't exist in our environment yet, it will be pulled down automatically as part of the deployment process.
+This JSON file is describing the attributes of the application environment. For example, it is giving the pod a "name" and "labels", the container a "name" and "ports", and specifying the "image" to use for creating the container. Since the fedora/apache image doesn't exist in our environment yet, it will be pulled down automatically as part of the deployment process.
 
 For more information about which options can go in the schema, check out the docs on the [kubernetes github page](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs).
 
@@ -227,7 +227,20 @@ d7f8acd884f7 fedora/apache:latest "/run-apache.sh" 2 minutes ago Up 2 minutes   
 
 ## Create a service to make the pod discoverable ##
 
-Now that the pod is known to be running we need a way to find it.  Pods in kubernetes may launch on any node and get an IP addresses from flannel.  So finding them is obviously not easy.  You don't want people to have to look up what node the web server is on before they can find your web page!  Kubernetes solves this with a "service"  By default kubernetes will create an internal IP address for the service (from the portal_net range) which pods can use to find the service.  But we want the web server to be available outside the cluster.  So we need to tell kubernetes how traffic will arrive into the cluster destined for this webserver.  To do so we define a list of "publicIPs".  These need to be actual IP addresses assigned to actual nodes.  In configurations like AWS or OpenStack where machines have both a public IP assigned somewhere "in the cloud" and the private IP assigned to the node, you must use the private IP.  This IP must be assigned to a node and be visable on the node via "ip addr." This is a list, you may list multiple nodes public IP.
+Now that the pod is known to be running we need a way to find it.  Pods in
+kubernetes may launch on any node and get an IP addresses from flannel.  So
+finding them is obviously not easy.  You don't want people to have to look up
+what node the web server is on before they can find your web page!  Kubernetes
+solves this with a "service".  By default kubernetes will create an internal IP
+address for the service (from the portal_net range) which pods can use to find
+the service.  But we want the web server to be available outside the cluster.
+So we need to tell kubernetes how traffic will arrive into the cluster destined
+for this webserver.  To do so we provide a list of "publicIPs".  These need to
+be actual IP addresses assigned to actual nodes.  In configurations like AWS or
+OpenStack where machines have both a public IP assigned somewhere "in the
+cloud" and the private IP assigned to the node, you must use the private IP.
+This IP must be assigned to a node and be visible on the node via "ip addr."
+This is a list, so you may list multiple nodes' public IPs.
 
 * Create a service on the master by creating a `service.json` file
 
@@ -277,7 +290,7 @@ frontend-service    name=frontend                             name=apache       
 kubernetes          component=apiserver,provider=kubernetes   <none>              10.254.8.30         443
 ```
 
-* Check out how it by looking at the following commands on any node 
+* Check out how proxying is done by running the following commands on any node.
 
 ```bash
 iptables -nvL -t nat
