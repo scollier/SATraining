@@ -122,9 +122,9 @@ done
 
 ```
 $ kubectl get nodes
-NAME           LABELS        STATUS
-192.168.121.147   Schedulable   <none>    Ready
-192.168.121.101   Schedulable   <none>    Ready
+NAME              LABELS    STATUS
+192.168.121.147   <none>    Ready
+192.168.121.101   <none>    Ready
 ```
 
 **The cluster should be running! Launch a test pod.**
@@ -136,35 +136,33 @@ NAME           LABELS        STATUS
 
 ```json
 {
-    "apiVersion": "v1beta1",
-    "desiredState": {
-        "manifest": {
-            "containers": [
-                {
-                    "image": "fedora/apache",
-                    "name": "my-fedora-apache",
-                    "ports": [
-                        {
-                            "containerPort": 80,
-                            "protocol": "TCP"
-                        }
-                    ]
-                }
-            ],
-            "id": "apache",
-            "restartPolicy": {
-                "always": {}
-            },
-            "version": "v1beta1",
-            "volumes": null
+    "apiVersion": "v1beta3",
+    "kind": "Pod",
+    "metadata": {
+        "name": "apache-pod",
+        "namespace": "default",
+        "labels": {
+            "name": "apache"
         }
     },
-    "id": "apache",
-    "kind": "Pod",
-    "labels": {
-        "name": "apache"
-    },
-    "namespace": "default"
+    "spec": {
+        "containers": [
+            {
+                "name": "fedora-apache-container",
+                "image": "fedora/apache",
+                "ports": [
+                    {
+                        "containerPort": 80,
+                        "protocol": "TCP"
+                    }
+                ]
+            }
+        ],
+        "restartPolicy": "Always",
+        "volumes": [
+
+        ]
+    }
 }
 ```
 
@@ -197,13 +195,16 @@ journalctl -f -l -xn -u kubelet -u kube-proxy -u docker
 
 ```
 # kubectl get pods
-POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-apache              18.0.53.3           my-fedora-apache    fedora/apache       192.168.121.147/    name=apache         Running
-mysql               18.0.73.2           mysql               mysql               192.168.121.101/    name=mysql          Running
-redis-master        18.0.53.2           master              dockerfile/redis    192.168.121.147/    name=redis-master   Running
+POD                 IP                  CONTAINER(S)                  IMAGE(S)            HOST                LABELS              STATUS
+apache-pod          18.0.53.3                                                             192.168.121.147/    name=apache         Running
+                                        fedora-apache-container       fedora/apache                                               Running
+mysql-pod           18.0.73.2                                                             192.168.121.101/    name=mysql          Running
+                                        mysql-container               mysql                                                       Running
+redis-master        18.0.53.2                                                             192.168.121.147/    name=redis-master   Running
+                                        master                        dockerfile/redis                                            Running
 ```
 
-The state might be 'Pending'. This indicates that docker is still attempting to download and launch the container.
+The status might be 'Pending'. This indicates that docker is still attempting to download and launch the container.
 
 * You can get even more information about the pod like this.
 
@@ -220,8 +221,8 @@ kubernetes/pause latest 6c4579af347b 7 weeks ago 239.8 kB
 fedora/apache latest 6927a389deb6 3 months ago 450.6 MB
 
 docker ps -l
-CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
-05c69c00ea48 fedora/apache:latest "/run-apache.sh" 2 minutes ago Up 2 minutes k8s--master.3f918229--apache.etcd--8cd6efe6_-_3a95_-_11e4_-_b618_-_5254005318cb--9bb78458
+CONTAINER ID IMAGE                COMMAND          CREATED       STATUS       PORTS NAMES
+d7f8acd884f7 fedora/apache:latest "/run-apache.sh" 2 minutes ago Up 2 minutes       k8s_fedora-apache-container.91a73141_apache-pod_default_93f516e6-1f58-11e5-bc52-fa163eaa95e0_63c698fe
 ```
 
 ## Create a service to make the pod discoverable ##
@@ -234,19 +235,28 @@ Now that the pod is known to be running we need a way to find it.  Pods in kuber
 
 ```json
 {
-    "apiVersion": "v1beta1",
-    "containerPort": 80,
-    "id": "frontend",
+    "apiVersion": "v1beta3",
     "kind": "Service",
-    "labels": {
-        "name": "frontend"
+    "metadata": {
+        "name": "frontend-service",
+        "namespace": "default",
+        "labels": {
+            "name": "frontend"
+        }
     },
-    "port": 80,
-    "publicIPs": [
-        "NODE_PRIV_IP_1"
-    ],
-    "selector": {
-        "name": "apache"
+    "spec": {
+        "selector": {
+            "name": "apache"
+        },
+        "ports": [
+            {
+                "protocol": "TCP",
+                "port": 80
+            }
+        ],
+        "publicIPs": [
+            "NODE_PRIV_IP_1"
+        ]
     }
 }
 ```
@@ -263,7 +273,7 @@ kubectl create -f service.json
 # kubectl get services
 NAME                LABELS                                    SELECTOR            IP                  PORT
 kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.254.207.162      80
-frontend            name=frontend                             name=apache         10.254.195.231      80
+frontend-service    name=frontend                             name=apache         10.254.195.231      80
 kubernetes          component=apiserver,provider=kubernetes   <none>              10.254.8.30         443
 ```
 
@@ -290,7 +300,7 @@ firefox http://NODE_PUBLIC_IP_1/
 * To delete the container.
 
 ```
-kubectl delete pod apache
+kubectl delete pod apache-pod
 ```
 
 ## Create a replication controller to control the pod ##
@@ -301,44 +311,45 @@ This should have the exact same definition of the pod as above, only now it is b
 
 ```json
 {
-    "apiVersion": "v1beta1",
-    "desiredState": {
-        "podTemplate": {
-            "desiredState": {
-                "manifest": {
-                    "containers": [
-                        {
-                            "image": "fedora/apache",
-                            "name": "my-fedora-apache",
-                            "ports": [
-                                {
-                                    "containerPort": 80,
-                                    "protocol": "TCP"
-                                }
-                            ]
-                        }
-                    ],
-                    "id": "apache",
-                    "restartPolicy": {
-                        "always": {}
-                    },
-                    "version": "v1beta1",
-                    "volumes": null
-                }
-            },
-            "labels": {
-                "name": "apache"
-            }
-        },
-        "replicaSelector": {
+    "apiVersion": "v1beta3",
+    "kind": "ReplicationController",
+    "metadata": {
+        "name": "apache-controller",
+        "namespace": "default",
+        "labels": {
+            "name": "apache"
+        }
+    },
+    "spec": {
+        "replicas": 1,
+        "selector": {
             "name": "apache"
         },
-        "replicas": 1
-    },
-    "id": "apache-controller",
-    "kind": "ReplicationController",
-    "labels": {
-        "name": "apache"
+        "template": {
+            "metadata": {
+                "labels": {
+                    "name": "apache"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "name": "fedora-apache-container",
+                        "image": "fedora/apache",
+                        "ports": [
+                            {
+                                "containerPort": 80,
+                                "protocol": "TCP"
+                            }
+                        ]
+                    }
+                ],
+                "restartPolicy": "Always",
+                "volumes": [
+
+                ]
+            }
+        }
     }
 }
 ```
@@ -352,16 +363,16 @@ kubectl create -f rc.json
 
 ```bash
 # kubectl get rc
-CONTROLLER          CONTAINER(S)        IMAGE(S)            SELECTOR            REPLICAS
-apache-controller   my-fedora-apache    fedora/apache       name=apache         1
+CONTROLLER          CONTAINER(S)               IMAGE(S)            SELECTOR            REPLICAS
+apache-controller   fedora-apache-container    fedora/apache       name=apache         1
 ```
 
 * The replication controller should have spawned a pod on a node.  (This make take a short while, so STATUS may be Unknown at first)
 
 ```bash
 # kubectl get pods
-POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-node1/       name=apache         Running
+POD                                    IP                  CONTAINER(S)               IMAGE(S)            HOST              LABELS              STATUS
+52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           fedora-apache-container    fedora/apache       kube-node1/       name=apache         Running
 ```
 
 Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes `publicIP` balances between ALL of the replicas!
@@ -371,14 +382,14 @@ Feel free to resize the replication controller and run multiple copies of apache
 resized
 
 # kubectl get rc
-CONTROLLER          CONTAINER(S)        IMAGE(S)            SELECTOR            REPLICAS
-apache-controller   my-fedora-apache    fedora/apache       name=apache         3
+CONTROLLER          CONTAINER(S)               IMAGE(S)            SELECTOR            REPLICAS
+apache-controller   fedora-apache-container    fedora/apache       name=apache         3
 
 # kubectl get pods
-POD                                    IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS
-ac23ccfa-be99-11e4-91e5-52540052bd24   18.0.98.3           my-fedora-apache    fedora/apache       kube-node2/         name=apache         Running
-52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           my-fedora-apache    fedora/apache       kube-node1/         name=apache         Running
-ac22a801-be99-11e4-91e5-52540052bd24   18.0.98.2           my-fedora-apache    fedora/apache       kube-node2/         name=apache         Running
+POD                                    IP                  CONTAINER(S)               IMAGE(S)            HOST                LABELS              STATUS
+ac23ccfa-be99-11e4-91e5-52540052bd24   18.0.98.3           fedora-apache-container    fedora/apache       kube-node2/         name=apache         Running
+52228aef-be99-11e4-91e5-52540052bd24   18.0.79.4           fedora-apache-container    fedora/apache       kube-node1/         name=apache         Running
+ac22a801-be99-11e4-91e5-52540052bd24   18.0.98.2           fedora-apache-container    fedora/apache       kube-node2/         name=apache         Running
 ```
 
 I suggest you resize to 0 before you delete the replication controller.  Deleting a `replicationController` will leave the pods running.
