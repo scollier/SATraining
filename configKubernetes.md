@@ -122,7 +122,7 @@ NAME              LABELS    STATUS
 
 ```json
 {
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "kind": "Pod",
     "metadata": {
         "name": "apache-pod",
@@ -234,7 +234,7 @@ This is a list, so you may list multiple nodes' public IPs.
 
 ```json
 {
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "kind": "Service",
     "metadata": {
         "name": "frontend-service",
@@ -310,7 +310,7 @@ This should have the exact same definition of the pod as above, only now it is b
 
 ```json
 {
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "kind": "ReplicationController",
     "metadata": {
         "name": "apache-controller",
