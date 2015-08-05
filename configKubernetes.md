@@ -53,13 +53,6 @@ KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
 KUBE_API_ARGS=""
 ```
 
-* Edit `/etc/kubernetes/controller-manager` to appear as such.  Substitute your node IPs here in place of the NODE_PRIV_IP_{1,2} placeholder.
-
-```
-# Comma separated list of minions
-KUBELET_ADDRESSES="--machines=NODE_PRIV_IP_1,NODE_PRIV_IP_2"
-```
-
 * Start the appropriate services on master:
 
 ```bash
