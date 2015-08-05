@@ -353,7 +353,7 @@ POD                                    IP                  CONTAINER(S)        I
 Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes `publicIP` balances between ALL of the replicas!
 
 ```bash
-# kubectl resize --replicas=3 replicationController apache-controller
+# kubectl scale --replicas=3 replicationController apache-controller
 resized
 
 # kubectl get rc
