@@ -111,7 +111,7 @@ FLANNEL_ETCD="http://x.x.x.x:2379"
 FLANNEL_ETCD_KEY="/coreos.com/network"
 
 # Any additional options that you want to pass
-FLANNEL_OPTIONS="eth0"
+FLANNEL_OPTIONS="-iface eth0"
 ```
 
 
