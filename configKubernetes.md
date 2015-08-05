@@ -92,13 +92,6 @@ KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 KUBELET_ARGS="--auth_path=/var/lib/kubelet/auth"
 ```
 
-* edit `/etc/kubernetes/proxy` to appear as below.
-
-```
-# How the proxy find the apiserver
-KUBE_PROXY_ARGS="--master=http://MASTER_PRIV_IP_ADDR:8080"
-```
-
 * Start the appropriate services on the nodes.
 
 ```bash
