@@ -230,7 +230,7 @@ This is a list, so you may list multiple nodes' public IPs.
 
 * Create a service on the master by creating a `service.json` file
 
-**NOTE:** You must use an actual IP address for the `publicIPs` value or the service will not run correctly on the nodes
+**NOTE:** You must use an actual IP address for the `deprecatedPublicIPs` value or the service will not run correctly on the nodes
 
 ```json
 {
@@ -253,7 +253,7 @@ This is a list, so you may list multiple nodes' public IPs.
                 "port": 80
             }
         ],
-        "publicIPs": [
+        "deprecatedPublicIPs": [
             "NODE_PRIV_IP_1"
         ]
     }
