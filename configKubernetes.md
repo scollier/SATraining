@@ -41,7 +41,7 @@ KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 ```       
 # Comma separated list of nodes in the etcd cluster
-KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:4001"
+KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:2379"
 
 # The address on the local server to listen to.
 KUBE_API_ADDRESS="--address=0.0.0.0"
@@ -51,13 +51,6 @@ KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
 
 # Add you own!
 KUBE_API_ARGS=""
-```
-
-* Edit `/etc/kubernetes/controller-manager` to appear as such.  Substitute your node IPs here in place of the NODE_PRIV_IP_{1,2} placeholder.
-
-```
-# Comma separated list of minions
-KUBELET_ADDRESSES="--machines=NODE_PRIV_IP_1,NODE_PRIV_IP_2"
 ```
 
 * Start the appropriate services on master:
@@ -97,13 +90,6 @@ KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
 
 # Add your own!
 KUBELET_ARGS="--auth_path=/var/lib/kubelet/auth"
-```
-
-* edit `/etc/kubernetes/proxy` to appear as below.
-
-```
-# How the proxy find the apiserver
-KUBE_PROXY_ARGS="--master=http://MASTER_PRIV_IP_ADDR:8080"
 ```
 
 * Start the appropriate services on the nodes.
@@ -367,7 +353,7 @@ POD                                    IP                  CONTAINER(S)        I
 Feel free to resize the replication controller and run multiple copies of apache.  Note that the kubernetes `publicIP` balances between ALL of the replicas!
 
 ```bash
-# kubectl resize --replicas=3 replicationController apache-controller
+# kubectl scale --replicas=3 replicationController apache-controller
 resized
 
 # kubectl get rc

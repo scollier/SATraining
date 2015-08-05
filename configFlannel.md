@@ -34,7 +34,7 @@ rpm -qc flannel
 
 ```
 # grep ETCD_LISTEN_CLIENT_URLS /etc/etcd/etcd.conf
-ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:4001"
+ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
 ```
 
 
@@ -63,11 +63,11 @@ ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:4001"
 }
 ```
 
-* Add the configuration to the etcd server. Use the public IP address of the master node. If this is an OpenStack VM you will need to look up the public IP address on the OpenStack Horizon dashboard.
+* Add the configuration to the etcd server. Use the public IP address of the master node. If this is an OpenStack VM you will need to look up the public IP address on the OpenStack Horizon dashboard. Just using 127.0.0.1 from the master also works.
 
 
 ```
-# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config -XPUT --data-urlencode value@flannel-config.json
+# curl -L http://x.x.x.x:2379/v2/keys/coreos.com/network/config -XPUT --data-urlencode value@flannel-config.json
 ```
 
 Example of successful output:
@@ -80,7 +80,7 @@ Example of successful output:
 
 
 ```
-# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
+# curl -L http://x.x.x.x:2379/v2/keys/coreos.com/network/config
 ```
 
 * Backup the flannel configuration file.
@@ -104,14 +104,14 @@ Example of successful output:
 # Flanneld configuration options
 
 # etcd url location.  Point this to the server where etcd runs
-FLANNEL_ETCD="http://x.x.x.x:4001"
+FLANNEL_ETCD="http://x.x.x.x:2379"
 
 # etcd config key.  This is the configuration key that flannel queries
 # For address range assignment
 FLANNEL_ETCD_KEY="/coreos.com/network"
 
 # Any additional options that you want to pass
-FLANNEL_OPTIONS="eth0"
+FLANNEL_OPTIONS="-iface eth0"
 ```
 
 
