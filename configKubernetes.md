@@ -41,7 +41,7 @@ KUBE_MASTER="--master=http://MASTER_PRIV_IP_ADDR:8080"
 
 ```       
 # Comma separated list of nodes in the etcd cluster
-KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:4001"
+KUBE_ETCD_SERVERS="--etcd_servers=http://MASTER_PRIV_IP_ADDR:2379"
 
 # The address on the local server to listen to.
 KUBE_API_ADDRESS="--address=0.0.0.0"
