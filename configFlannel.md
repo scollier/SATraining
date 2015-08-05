@@ -63,7 +63,7 @@ ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
 }
 ```
 
-* Add the configuration to the etcd server. Use the public IP address of the master node. If this is an OpenStack VM you will need to look up the public IP address on the OpenStack Horizon dashboard.
+* Add the configuration to the etcd server. Use the public IP address of the master node. If this is an OpenStack VM you will need to look up the public IP address on the OpenStack Horizon dashboard. Just using 127.0.0.1 from the master also works.
 
 
 ```
