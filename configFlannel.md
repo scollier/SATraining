@@ -160,7 +160,7 @@ Now that master is configured, lets configure the other nodes (node{1,2}).
 
 
 ```
-# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/config
+# curl -L http://x.x.x.x:2379/v2/keys/coreos.com/network/config
 ```
 
 For some of the steps below, it might help to set up ssh keys on the master and copy those over to the nodes, e.g. with ssh-copy-id.  You also might want to set hostnames on the nodes and edit your `/etc/hosts` files on all nodes to reflect that.
@@ -193,7 +193,7 @@ From any node in the cluster, check the cluster members by issuing a query to et
 *Here the etcd server is the master node*
 
 ```
-# curl -L http://x.x.x.x:4001/v2/keys/coreos.com/network/subnets | python -mjson.tool
+# curl -L http://x.x.x.x:2379/v2/keys/coreos.com/network/subnets | python -mjson.tool
 ```
 
 
