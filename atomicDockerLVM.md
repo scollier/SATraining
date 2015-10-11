@@ -134,7 +134,7 @@ M    nsswitch.conf
 A    somefile
 ```
 
-* Compare _/usr/etc_ to _etc_. Notice how _somefile_ is not in _/usr/etc_.
+* Compare _/usr/etc_ to _/etc_. Notice how _somefile_ is not in _/usr/etc_.
 
 ```
 # ls /usr/etc/some*
