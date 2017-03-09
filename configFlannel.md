@@ -93,7 +93,7 @@ Example of successful output:
 * Configure flannel using the network interface of the system. This is commonly `eth0` but might be `ens3`. Use `ip a` to list network interfaces. This should not be necessary on most systems unless they have multiple network interfaces.  In which case you will want to use the interface capable of talking to other nodes in the cluster.
 
 ```
-# sed -i 's/#FLANNEL_OPTIONS=""/FLANNEL_OPTIONS="eth0"/g' /etc/sysconfig/flanneld
+# sed -i 's/#FLANNEL_OPTIONS=""/FLANNEL_OPTIONS="-iface eth0"/g' /etc/sysconfig/flanneld
 ```
 
 
