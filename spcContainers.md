@@ -439,12 +439,11 @@ RUN yum-config-manager --disable \*
 RUN yum-config-manager --enable rhel-7-server-rpms
 RUN yum -y update; yum -y install httpd; yum clean all; systemctl enable httpd
 
-LABEL Version=1.0
-LABEL Vendor="Red Hat" License=GPLv3
-LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=${LOGDIR} -e CONFDIR=${CONFDIR} -e DATADIR=${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh"
-LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/uninstall.sh"
+LABEL Version=1.0 Vendor="Red Hat" License=GPLv3
 
-LABEL RUN="docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup httpd"
+LABEL INSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e LOGDIR=\${LOGDIR} -e CONFDIR=\${CONFDIR} -e DATADIR=\${DATADIR} -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/install.sh"
+LABEL UNINSTALL="docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /usr/bin/uninstall.sh"
+LABEL RUN="docker run -dt -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup IMAGE"
 
 ADD root /
 
@@ -476,12 +475,12 @@ mkdir -p ${HOST}/${CONFDIR} ${HOST}/${LOGDIR}/httpd ${HOST}/${DATADIR}
 cp -pR /etc/httpd ${HOST}/${CONFDIR}
 
 # Create Container
-chroot ${HOST} /usr/bin/docker create -v /var/log/${NAME}/httpd:/var/log/httpd:Z -v /var/lib/${NAME}:/var/lib/httpd:Z --name ${NAME} ${IMAGE}
+chroot ${HOST} /usr/bin/docker create -v /var/log/${NAME}/httpd:/var/log/httpd:Z -v /var/lib/${NAME}:/var/lib/httpd:Z -p 80 -v /sys/fs/cgroup:/sys/fs/cgroup --name ${NAME} ${IMAGE}
 
 # Install systemd unit file for running container
 sed -e "s/TEMPLATE/${NAME}/g" /etc/systemd/system/httpd_template.service > ${HOST}/etc/systemd/system/httpd_${NAME}.service
 
-# Enabled systemd unit file
+# Enable systemd unit file
 chroot ${HOST} /usr/bin/systemctl enable httpd_${NAME}.service
 ```
 
