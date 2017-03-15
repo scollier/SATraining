@@ -76,14 +76,12 @@ done
 echo "{}" > /var/lib/kubelet/auth
 ```
 
-* Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet or node IP addresses appropriately. You have to make two changes below.
+* Edit `/etc/kubernetes/kubelet` to appear as below.  Make sure you substitute kublet and master node IP addresses appropriately. You have to make two changes below.  The KUBLET_HOSTNAME can be the floating IP address of the node.
 
 ```
 # The address for the info server to serve on
 KUBELET_ADDRESS="--address=0.0.0.0"
 
-# this MUST match what you used in KUBELET_ADDRESSES on the controller manager
-# unless you used what hostname -f shows in KUBELET_ADDRESSES.
 KUBELET_HOSTNAME="--hostname_override=LOCAL_NODE_ETH0_ADDRESS"
 
 KUBELET_API_SERVER="--api_servers=http://MASTER_PRIV_IP_ADDR:8080"
@@ -280,7 +278,7 @@ kubernetes        component=apiserver,provider=kubernetes  <none>       10.254.8
 
 ```bash
 iptables -nvL -t nat
-journalctl -b -l -u kube-proxy
+journalctl -b -l -u kube-proxy | less
 ```
 
 * Finally, test that the container is actually working.
