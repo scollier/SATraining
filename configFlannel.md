@@ -30,11 +30,15 @@ rpm -qc flannel
 # ip a
 ```
 
-* Configure etcd to listen on the public IP of the node.  Change the ETCD_LISTEN_CLIENT_URLS from localhost to 0.0.0.0.
+* Configure etcd to listen on the public IP of the node.  Change the ETCD_LISTEN_CLIENT_URLS and ETCD_ADVERTISE_CLIENT_URLS from localhost to 0.0.0.0 and the public IP, respectively.
 
 ```
 # grep ETCD_LISTEN_CLIENT_URLS /etc/etcd/etcd.conf
 ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+```
+```
+# grep ETCD_ADVERTISE_CLIENT_URLS /etc/etcd/etcd.conf
+ETCD_ADVERTISE_CLIENT_URLS="http://PUBLIC.IP:4001"
 ```
 
 
@@ -115,11 +119,15 @@ FLANNEL_OPTIONS="-iface eth0"
 ```
 
 
-* Enable the flanneld service and reboot.
+* Enable the flanneld service, let systemd know that the local flanneld service needs a default route and the local etcd service to be started before it, and reboot.
 
 
 ```
-# systemctl enable flanneld
+# systemctl enable NetworkManager-wait-online.service
+# systemctl enable flanneld.service
+# mkdir /etc/systemd/system/flanneld.service.wants
+# ln -s /usr/lib/systemd/system/etcd.service /etc/systemd/system/flanneld.service.wants/
+# ln -s /usr/lib/systemd/system/NetworkManager-wait-online.service /etc/systemd/system/flanneld.service.wants/
 # systemctl reboot
 ```
 
@@ -254,13 +262,13 @@ At this point the flannel cluster is set up and we can test it. We have etcd run
 
 ##Test the flannel configuration
 
-From each node, pull a Docker image for testing. In our case, we will use fedora:20.
+From each node, pull a Docker image for testing. In our case, we will use rhel-tools.
 
 * Issue the following on node1.
 
 
 ```
-# docker run -it fedora:20 bash
+# docker run -it registry.access.redhat.com/rhel7/rhel-tools
 ```
 
 * This will place you inside the container. Check the IP address.
@@ -269,11 +277,11 @@ From each node, pull a Docker image for testing. In our case, we will use fedora
 ```
 # ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
-link/ether 02:42:0a:00:51:02 brd ff:ff:ff:ff:ff:ff
-inet 18.0.81.2/24 scope global eth0
-valid_lft forever preferred_lft forever
-inet6 fe80::42:aff:fe00:5102/64 scope link
-valid_lft forever preferred_lft forever
+    link/ether 02:42:0a:00:51:02 brd ff:ff:ff:ff:ff:ff
+    inet 18.0.81.2/24 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:aff:fe00:5102/64 scope link
+       valid_lft forever preferred_lft forever
 ```
 
 
@@ -283,7 +291,7 @@ You can see here that the IP address is on the flannel network.
 
 
 ```
-# docker run -it fedora:20 bash
+# docker run -it registry.access.redhat.com/rhel7/rhel-tools /bin/bash
 
 # ip a l eth0
 5: eth0:  mtu 1450 qdisc noqueue state UP group default
